@@ -1,21 +1,80 @@
-import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import {createAppContainer, createSwitchNavigator} from 'react-navigation';
+import {createStackNavigator} from 'react-navigation-stack';
+import {createBottomTabNavigator, createMaterialTopTabNavigator} from 'react-navigation-tabs';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+import SigninScreen from './src/screens/SigninScreen';
+import SignupScreen from './src/screens/SignupScreen';
+import ChatScreen from './src/screens/ChatScreen';
+import ContactsScreen from './src/screens/ContactsScreen';
+import EditProfileScreen from './src/screens/EditProfileScreen';
+import GroupScreen from './src/screens/GroupScreen';
+import HomeScreen from './src/screens/HomeScreen';
+import HubScreen from './src/screens/HubScreen';
+import NotificationScreen from './src/screens/NotificationScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
+import CreateProfileScreen from './src/screens/CreateProfileScreen';
+import PostDetailScreen from './src/screens/PostDetailScreen';
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+import {Provider as AuthProvider} from './src/context/AuthContext';
+
+import {setNavigator} from './src/navigationRef';
+import ResolveAuthScreen from './src/screens/ResolveAuthScreen';
+import InitScreen from './src/screens/InitScreen';
+
+// nav --
+const profileFlow = createStackNavigator({
+  Profile: ProfileScreen,
+  EditProfile: EditProfileScreen
 });
+
+const messageFlow = createMaterialTopTabNavigator({
+  Convo: ChatScreen,
+  Contacts: ContactsScreen
+});
+
+// can this go?
+const authFlow = createStackNavigator({
+  Signup: SignupScreen,
+  Signin: SigninScreen,
+});
+
+const hubFlow = createStackNavigator({
+  Home: HomeScreen,
+  Hub: HubScreen,
+  PostDetail: PostDetailScreen,
+});
+
+const notificationsFlow = createStackNavigator({
+  Notifications: NotificationScreen,
+  PostDetail: PostDetailScreen
+});
+
+const switchNavigator = createSwitchNavigator({
+  //ResolveAuth: ResolveAuthScreen,
+
+  /*
+  initFlow: createStackNavigator({
+    Init: InitScreen,
+    Signup: SignupScreen,
+    Signin: SigninScreen,
+    CreateProfile: CreateProfileScreen
+  }),*/
+  mainFlow: createBottomTabNavigator({
+      Home: hubFlow,
+      Profile: profileFlow,
+      Notifications: notificationsFlow,
+      Chat: messageFlow
+  }),
+});
+
+const App = createAppContainer(switchNavigator);
+
+// make the navigator available to the rest of the app 
+export default () => {
+  return (
+    <AuthProvider>
+        <App ref={(navigator) => {setNavigator(navigator)}} />
+    </AuthProvider>
+  );
+};
