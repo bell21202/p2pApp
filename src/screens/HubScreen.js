@@ -1,28 +1,43 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {Text, View, StyleSheet, TouchableOpacity, Image, FlatList, BackHandler} from 'react-native';
-import {Icon} from 'react-native-elements';
+import {Icon, Overlay} from 'react-native-elements';
 import PostInput from '../components/PostInput';
 import {Context as AuthContext} from '../context/AuthContext';
 import Post from '../components/Post';
 import {getPostRepliesById} from '../helpers/getPostsRelationship';
+import { Switch } from 'react-native-paper';
 
 var hubType;
 
 const HubScreen = ({navigation}) => {
     const {state, submitPost, getPosts} = useContext(AuthContext);
     const {posts} = state;
-    
     const [visible, setVisible] = useState(false);
-   
+
+    // admin related
+    const [showOverlay, setShowOverlay] = useState(false);
+    const [isSwitchOn, setIsSwitchOn] = useState(false);
+
     var inputRef = null;
     var isLoading = false;
-
-    //console.log('rendering in hubscreen');
     
     //var color = '#' + colorGen(); // put this in the parent
 
     const renderInput = () => {
         setVisible(!visible);
+    }
+
+    console.log('rendering');
+
+    const isUserAdmin = () => {
+        if (isAdmin) {
+            // show modal
+            setShowOverlay(!showOverlay);
+        }
+        // continue on as normal
+        else{
+            submitPost({"value" : inputRef.props.value, hubType, firstname, lastname, isAdmin: isSwitchOn }), renderInput()
+        }
     }
 
     // grab the backwards navigation for a sec..
@@ -50,7 +65,7 @@ const HubScreen = ({navigation}) => {
     }, [visible]); // todo: come back to this, do we need to run use effect so much??
 
     const fetchPosts = async () => {
-        console.log('running fetchposts');
+        console.log('running fetchposts from hubscreen');
         isLoading = true;
 
         try {
@@ -69,6 +84,7 @@ const HubScreen = ({navigation}) => {
     //var posts = [{'message':'Lets make this look like a real message with real words and not just gibberish.', '_id': 'i', 'firstname': 'Stanley', 'lastname': 'Adrisse'}, {'message':'Lets make this look like a real message with real words and not just gibberish.', '_id': 'j', 'firstname': 'Tenaj', 'lastname': 'Moody'}, {'message':'Lets make this look like a real message with real words and not just gibberish.', '_id': 'p', 'firstname': 'Spence', 'lastname': 'Anderson'}];
     var firstname = 'Tenaj';
     var lastname = 'Moody';
+    var isAdmin = true;
 
     // keep for now..
     const separator = () => 
@@ -88,6 +104,11 @@ const HubScreen = ({navigation}) => {
             );
         }
     };
+
+    const switchToggle = () => {
+        // set isAdmin flag on posts
+        setIsSwitchOn(!isSwitchOn);
+    }
 
     return (
     <>
@@ -115,10 +136,27 @@ const HubScreen = ({navigation}) => {
             /> :
             <View style={[styles.postInputView, visible ? {width: '100%'} : {width: '0'}]}> 
                 <PostInput ref={input  => inputRef = input} title={firstLetterInName} placeholder={'Add a post'} />
-                <TouchableOpacity onPress={() => [submitPost({"value" : inputRef.props.value, hubType, firstname, lastname }), renderInput()]}>
+                <TouchableOpacity onPress={() => isUserAdmin()}>
                     <Image style={styles.iconStyle} source={require('../img/planeFill_icon.png')} />
                 </TouchableOpacity>
             </View>
+        }
+
+        {showOverlay ?
+            <View style={styles.adminOverlay}>
+                <Overlay isVisible={showOverlay}>
+                    <View>
+                        <View style={styles.adminSwitch}>
+                            <Text style={{marginRight: 40, fontSize: 16, color: 'gray'}}> Post as Administrator </Text>
+                            <Switch color={'gray'} value={isSwitchOn} onValueChange={switchToggle} />
+                        </View>
+                        <TouchableOpacity style={styles.adminSend} onPress={() => [submitPost({"value" : inputRef.props.value, hubType, firstname, lastname, isAdmin: isSwitchOn}), setShowOverlay(!showOverlay), renderInput()]}>
+                            <Text style={{color: '#2196f3', fontWeight: 'bold', fontSize: 16, marginRight: 5}}> Send </Text>
+                            <Image style={{width: 20, height: 20 }} source={require('../img/planeFill_icon.png')} />
+                        </TouchableOpacity>
+                    </View>
+                </Overlay>
+            </View> : null
         }
     </> 
     );
@@ -162,6 +200,15 @@ const styles = StyleSheet.create({
     iconStyle: {
         marginTop: 20, 
         marginLeft: -10
+    },
+    adminSwitch: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        margin: 10
+    },
+    adminSend: {
+        alignSelf: 'center',
+        flexDirection: 'row'
     }
 })
 

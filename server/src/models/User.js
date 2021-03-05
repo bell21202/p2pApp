@@ -22,6 +22,9 @@ const userSchema = new mongoose.Schema({
     },
     cohortDate: {
         type: Date
+    },
+    isAdmin: {
+        type: Boolean
     }
 });
 

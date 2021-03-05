@@ -1,24 +1,24 @@
 import React, {useContext, useEffect} from 'react';
-import {View, StyleSheet, FlatList} from 'react-native';
+import {View, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
 import Notification from '../components/Notification';
 import {Context as AuthContext} from '../context/AuthContext';
 
-
-const NotificationScreen = () => {
-    const {state, getPosts} = useContext(AuthContext);
-    const {posts} = state;
+const NotificationScreen = ({navigation}) => {
+    const {state, getAdminPosts} = useContext(AuthContext);
+    const {adminPosts} = state;
 
     var isLoading = false;
 
     useEffect(() => {
-        console.log('in use effect ns'); 
+        console.log('in use effect notification screen');
         fetchAdminPosts();
     }, []);
 
     const fetchAdminPosts = async () => {
+        console.log('running fetchADMINposts from notification screen');
         isLoading = true;
         try{
-            await getPosts({'hubType':''});
+            await getAdminPosts({});
         }
         catch(err) {
             console.log("error in fetch posts"); // change later
@@ -27,15 +27,20 @@ const NotificationScreen = () => {
     }
 
     const constructNotification = (post) => {
-        return (
-            <Notification post={post.item} />
-        );
+        // only show the administrative post on this screen
+        if(post.item.isAdmin) {
+            return (
+                <TouchableOpacity onPress={() => navigation.navigate('PostDetail', {'post' : post.item})}>
+                    <Notification post={post.item} />
+                </TouchableOpacity>
+            );
+        }
     };
 
     return (
         <View style={styles.container}>
             <FlatList
-                data={posts}
+                data={adminPosts}
                 renderItem={(item) => constructNotification(item)}
                 keyExtractor={(item) => item._id}
                 refreshing={isLoading}

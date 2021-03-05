@@ -9,8 +9,8 @@ const authReducer = (state, action) => {
             return {...state, errorMessage: action.payload};
         case 'signin':
             var user = action.payload.user;
-            var token = action.payload.token;
-            return {errorMessage: '', email: user.email, firstname: user.firstname, lastname: user.lastname, memberType: user.memberType, cohortDate: user.cohortDate, token: token};
+            var token = action.payload.token; // todo: research if better to pass in a user and not this long string of state variables
+            return {errorMessage: '', email: user.email, firstname: user.firstname, lastname: user.lastname, memberType: user.memberType, cohortDate: user.cohortDate, isAdmin: user.isAdmin, token: token};
         case 'clear_error_message':
             return{...state, errorMessage: ''};
         case 'signout':
@@ -20,9 +20,11 @@ const authReducer = (state, action) => {
         case 'accountSaveError':
             return {...state, errorMessage: action.payload};
         case 'submitPost':
+            return {...state, posts: action.payload.posts, adminPosts: action.payload.posts};
         case 'getPosts':
-            console.log("in reducer" );
             return {...state, posts: action.payload.posts}
+        case 'getAdminPosts':
+            return {...state, adminPosts: action.payload.posts}
         case 'getPostsError':
         case 'submitPostError':
             return {...state, errorMessage: action.payload}
@@ -117,9 +119,10 @@ const submitPost = (dispatch) => async  (props) => {
     firstname = props.firstname;
     lastname = props.lastname;
     parentId = props.parentId;
+    isAdmin = props.isAdmin;
 
     try {
-        const response = await app_API.post('/submitPost', {postText, hubType, firstname, lastname, parentId});
+        const response = await app_API.post('/submitPost', {postText, hubType, firstname, lastname, parentId, isAdmin});
         dispatch({type: 'submitPost', payload: response.data});
     }
     catch(err) {
@@ -139,8 +142,19 @@ const getPosts = (dispatch) => async (props) => {
     }  
 }
 
+const getAdminPosts = (dispatch) => async () => {
+    try{
+        const response = await app_API.post('/getAdminPosts');
+        dispatch({type: 'getAdminPosts', payload: response.data})
+    }
+    catch(err) {
+        console.log(err);
+        dispatch({type: 'getPostsError', payload: err});
+    }
+}
+
 export const {Provider, Context} = createDataContext(authReducer,
-    {signin, signout, signup, clearErrorMessage, tryLocalSignin, accountSave, submitPost, getPosts},
-     {token: null, errorMessage: '', email: '', password: '', firstname: '', lastname: '', memberType: '', cohortDate: null, posts: []});
+    {signin, signout, signup, clearErrorMessage, tryLocalSignin, accountSave, submitPost, getPosts, getAdminPosts},
+     {token: null, errorMessage: '', email: '', password: '', firstname: '', lastname: '', memberType: '', isAdmin: false, cohortDate: null, posts: [], adminPosts: []});
 
 
