@@ -18,7 +18,7 @@ const Category = ({children, routeName, navigation }) => {
 
 const styles = StyleSheet.create({
     container: {
-        paddingTop: 10,
+        paddingTop: 15,
         borderBottomColor: '#606060',
         borderColor: '#ebebeb',
         borderWidth: .75,
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
         width:95,
         backgroundColor: 'white',
         borderRadius: 10,
-        marginBottom: 15
+        marginBottom: 10
     }
 });
 
