@@ -2,6 +2,7 @@ import React from 'react';
 import {Avatar} from 'react-native-elements';
 import {View, Text, StyleSheet, Image} from 'react-native';
 import moment from 'moment';
+import UserAvatar from '../components/UserAvatar';
 
 const Post = ({post, replyCount, showInteractiveBar, isComment}) => {
     
@@ -15,14 +16,8 @@ const Post = ({post, replyCount, showInteractiveBar, isComment}) => {
             <View style = {[!isComment ? styles.header : styles.replyHeader]}>
                 
                 {!isAdminPost ?
-                     <Avatar
-                        rounded
-                        size={48}
-                        title={firstLetterTitle}
-                        //source={require("../img/unnamed.png")}
-                        placeholderStyle={{ backgroundColor: 'transparent' }}
-                        overlayContainerStyle={{backgroundColor: 'gray'}}
-                    /> :
+                    <UserAvatar title={firstLetterTitle} />
+                    :
                     <Avatar
                         rounded
                         size={48}
