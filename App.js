@@ -15,6 +15,7 @@ import NotificationScreen from './src/screens/NotificationScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import CreateProfileScreen from './src/screens/CreateProfileScreen';
 import PostDetailScreen from './src/screens/PostDetailScreen';
+import ChangePasswordScreen from './src/screens/ChangePasswordScreen';
 
 import {Provider as AuthProvider} from './src/context/AuthContext';
 
@@ -25,7 +26,8 @@ import InitScreen from './src/screens/InitScreen';
 // nav --
 const profileFlow = createStackNavigator({
   Profile: ProfileScreen,
-  EditProfile: EditProfileScreen
+  EditProfile: EditProfileScreen,
+  ChangePassword: ChangePasswordScreen,
 });
 
 const messageFlow = createMaterialTopTabNavigator({

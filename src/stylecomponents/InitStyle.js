@@ -49,4 +49,10 @@ export default StyleSheet.create({
         fontSize: 18,
         color: '#2196f3'
     },
+
+    // todo: rename entire file to global style or something
+    errorMessage: {
+        fontSize: 14,
+        color:'#e16122',
+    },
 });

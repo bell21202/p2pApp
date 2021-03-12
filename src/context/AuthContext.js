@@ -28,6 +28,8 @@ const authReducer = (state, action) => {
         case 'getPostsError':
         case 'submitPostError':
             return {...state, errorMessage: action.payload}
+        case 'changePasswordError':
+            return {...state, errorMessage: action.payload}
         default:
             return state;
     }
@@ -113,6 +115,24 @@ const accountSave = (dispatch) => async (props) => {
     }
 }
 
+const changePassword = (dispatch) => async (props) => {
+    oldPass = props.oldPass;
+    newPass = props.newPass;
+    var navigation = props.navigation;
+
+    try{
+        await app_API.post('/changePassword', {oldPass, newPass});
+        dispatch({type: 'clear_error_message'});
+        if(navigation)
+        {
+            navigation.pop(); // navigate back to parent caller
+        }
+    }
+    catch(err) {
+        dispatch({type:'changePasswordError', payload: 'Password entered does not match your previous password.'});
+    }
+}
+
 const submitPost = (dispatch) => async  (props) => {
     postText = props.value;
     hubType = props.hubType;
@@ -154,7 +174,7 @@ const getAdminPosts = (dispatch) => async () => {
 }
 
 export const {Provider, Context} = createDataContext(authReducer,
-    {signin, signout, signup, clearErrorMessage, tryLocalSignin, accountSave, submitPost, getPosts, getAdminPosts},
+    {signin, signout, signup, clearErrorMessage, tryLocalSignin, accountSave, submitPost, getPosts, getAdminPosts, changePassword},
      {token: null, errorMessage: '', email: '', password: '', firstname: '', lastname: '', memberType: '', isAdmin: false, cohortDate: null, posts: [], adminPosts: []});
 
 

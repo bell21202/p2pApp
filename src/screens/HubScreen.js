@@ -27,8 +27,6 @@ const HubScreen = ({navigation}) => {
         setVisible(!visible);
     }
 
-    console.log('rendering');
-
     const isUserAdmin = () => {
         if (isAdmin) {
             // show modal
@@ -80,8 +78,6 @@ const HubScreen = ({navigation}) => {
 
     // get rid of later 
     var firstLetterInName = 'T'; // from current user!!
-
-    //var posts = [{'message':'Lets make this look like a real message with real words and not just gibberish.', '_id': 'i', 'firstname': 'Stanley', 'lastname': 'Adrisse'}, {'message':'Lets make this look like a real message with real words and not just gibberish.', '_id': 'j', 'firstname': 'Tenaj', 'lastname': 'Moody'}, {'message':'Lets make this look like a real message with real words and not just gibberish.', '_id': 'p', 'firstname': 'Spence', 'lastname': 'Anderson'}];
     var firstname = 'Tenaj';
     var lastname = 'Moody';
     var isAdmin = true;

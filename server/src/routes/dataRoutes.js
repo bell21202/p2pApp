@@ -91,6 +91,28 @@ router.post('/getAdminPosts', requireAuth, async (req, res) => {
     }
 })
 
+router.post('/changePassword', requireAuth, async (req, res) => {
+    const {oldPass, newPass} = req.body;
+    const user = req.user;
+    userId = user._id;
+
+    try{
+        await user.comparePassword(oldPass);
+
+        // now we can update the users password
+        await User.findOneAndUpdate({_id: userId}, {password: newPass}, (err,doc) => {
+            if (err) {
+                throw err;
+            }
+        });
+        res.status(200).send('completed'); // todo: make into constant values
+    }
+    catch(err) {
+        // the entered password doesn't match
+        return res.status(401).send(err.message);
+    }
+})
+
 const convertHubType = (hubType) => {
     if (hubType == 's' || hubType == 'stm') {
         return hubType;

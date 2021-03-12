@@ -4,7 +4,7 @@ import EditProfileForm from '../components/EditProfileForm';
 import Spacer from '../components/Spacer';
 import {Avatar} from 'react-native-elements';
 
-const CreateProfileScreen = () => {
+const CreateProfileScreen = ({navigation}) => {
     return (
     <View>
         <View style={styles.headerView}>
@@ -17,7 +17,7 @@ const CreateProfileScreen = () => {
             />
             </Spacer>
         </View>
-        <EditProfileForm />
+        <EditProfileForm nav={navigation} />
     </View>
     );
 };

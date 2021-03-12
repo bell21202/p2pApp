@@ -9,9 +9,10 @@ import moment from 'moment';
 import memTypeConverter from '../helpers/memTypeConverter';
 import { Checkbox } from 'react-native-paper';
 import InitStyle from '../stylecomponents/InitStyle';
+import {navigate} from '../navigationRef';
 
 
-const EditProfileForm = (newUser) => {
+const EditProfileForm = ({nav}) => {
     const {state, accountSave, clearErrorMessage} = useContext(AuthContext);
     const {email, firstname, lastname, memberType, cohortDate, errorMessage} = state;
 
@@ -78,7 +79,7 @@ const EditProfileForm = (newUser) => {
             />
          </Spacer>
          <Spacer>
-            <TouchableOpacity style={styles.passwordButton}> 
+            <TouchableOpacity style={styles.passwordButton} onPress={() => navigate('ChangePassword', {nav})}>
                 <Text style={{fontSize: 14, color: '#2196f3', fontWeight: 'bold'}}> Change password </Text>
             </TouchableOpacity>
         </Spacer>
@@ -147,7 +148,7 @@ const styles = StyleSheet.create({
         marginTop: 15
     },
     inputStyle: {
-        height: 35
+        height: 40
     },
     checkboxContainer: {
         flexDirection: 'row',
