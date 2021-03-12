@@ -23,6 +23,7 @@ const EditProfileForm = ({nav}) => {
     const [memberTypeIn, setMemType] = useState(memberType);
     const [cohortDateIn, setCohortDate] = useState(cohortDate);
     const [visible, setVisible] = useState(false);
+    const [internalErr, setInternalErr] = useState(null);
 
     // event handler from date picker
     const datePicked = (event, selectedDate) => {
@@ -42,6 +43,23 @@ const EditProfileForm = ({nav}) => {
        setMemType(val);
     }
     var type = memTypeConverter(memberTypeIn);
+
+    const validate = () => {
+        if(firstnameIn === null || firstnameIn === undefined || firstnameIn.match(/^ *$/) !== null){
+            setInternalErr('Firstname cannot be blank.')
+        }
+        else if(lastnameIn === null || lastnameIn === undefined || lastnameIn.match(/^ *$/) !== null){
+            setInternalErr('Lastname cannot be blank.')
+        }
+        else if(emailIn === null || emailIn === undefined || emailIn.match(/^ *$/) !== null){
+            setInternalErr('Email cannot be blank.')
+        }
+        // todo: should we require a member type..come back
+        else{
+            setInternalErr('');
+            accountSave({emailIn, firstnameIn, lastnameIn, memberTypeIn, cohortDateIn})
+        }
+    };
 
     return (
     <View>
@@ -77,8 +95,15 @@ const EditProfileForm = ({nav}) => {
                 style={styles.inputStyle}
                 theme={{ colors: { text: 'black', primary: '#2196f3' }}}
             />
-         </Spacer>
-         <Spacer>
+        </Spacer>
+        {internalErr ?
+        <View>
+            <Spacer>
+                <Text style={InitStyle.errorMessage}>{internalErr}</Text>
+            </Spacer>
+        </View> : null
+        }
+        <Spacer>
             <TouchableOpacity style={styles.passwordButton} onPress={() => navigate('ChangePassword', {nav})}>
                 <Text style={{fontSize: 14, color: '#2196f3', fontWeight: 'bold'}}> Change password </Text>
             </TouchableOpacity>
@@ -125,7 +150,7 @@ const EditProfileForm = ({nav}) => {
                 </Spacer>
                 <Spacer />
                 <Spacer>
-                    <TouchableOpacity style={InitStyle.button} onPress={() => accountSave({emailIn, firstnameIn, lastnameIn, memberTypeIn, cohortDateIn})}> 
+                    <TouchableOpacity style={InitStyle.button} onPress={() => validate()}>
                     <Text style={InitStyle.buttonText}> Save </Text>
                     </TouchableOpacity>
                 </Spacer>

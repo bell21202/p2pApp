@@ -49,7 +49,7 @@ const AuthForm = ({headerText, errorMessage, onSubmit, submitButtonText}) => {
                     </Text>
                 </View> : null
                 }
-                {errorMessage ? <Text style={styles.errorMessage}>{errorMessage}</Text> : null}
+                {errorMessage ? <Text style={[InitStyle.errorMessage, {marginLeft: 10, marginRight: 10}]}>{errorMessage}</Text> : null}
                 <Spacer>
                 <TouchableOpacity style={InitStyle.button} onPress={() => onSubmit({email,password})}>
                     <Text style={InitStyle.buttonText}>
@@ -64,12 +64,6 @@ const AuthForm = ({headerText, errorMessage, onSubmit, submitButtonText}) => {
 };
 
 const styles = StyleSheet.create({
-    errorMessage: {
-        fontSize: 14, 
-        color: '#e61610',
-        marginLeft: 10,
-        marginRight: 10
-    },
     inputStyle: {
         height: 45
     },
