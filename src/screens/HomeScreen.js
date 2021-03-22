@@ -38,7 +38,7 @@ const HomeSreen = ({navigation}) => {
                                     <Image style={styles.icon} source={require('../img/profile_icon.png')} />
                                     <Text style={styles.categoryText}> Profile </Text>
                                 </Category>
-                                <Category routeName={'Convo'}>
+                                <Category routeName={'Message'}>
                                     <Image style={styles.icon} source={require('../img/chat_icon.png')} />
                                     <Text style={styles.categoryText}> Chat </Text>
                                 </Category>

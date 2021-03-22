@@ -14,6 +14,7 @@ const ProfileScreen = ({navigation}) => {
     var type = memTypeConverter(memberType);
     var mem = [];
 
+    // todo: place in helper location
     formatConverter(type, mem);
     
     return (

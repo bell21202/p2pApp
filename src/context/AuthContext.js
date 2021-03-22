@@ -27,9 +27,12 @@ const authReducer = (state, action) => {
             return {...state, adminPosts: action.payload.posts}
         case 'getPostsError':
         case 'submitPostError':
+        case 'getUsersError':
             return {...state, errorMessage: action.payload}
         case 'changePasswordError':
             return {...state, errorMessage: action.payload}
+        case 'getUsers':
+            return {...state, users: action.payload.users}
         default:
             return state;
     }
@@ -173,8 +176,19 @@ const getAdminPosts = (dispatch) => async () => {
     }
 }
 
+const getUsers = (dispatch) => async () => {
+    try {
+        const response = await app_API.post('/getUsers');
+        dispatch({type: 'getUsers', payload: response.data})
+    }
+    catch(err) {
+        console.log(err);
+        dispatch({type: 'getUsersError', payload: err});
+    }
+}
+
 export const {Provider, Context} = createDataContext(authReducer,
-    {signin, signout, signup, clearErrorMessage, tryLocalSignin, accountSave, submitPost, getPosts, getAdminPosts, changePassword},
-     {token: null, errorMessage: '', email: '', password: '', firstname: '', lastname: '', memberType: '', isAdmin: false, cohortDate: null, posts: [], adminPosts: []});
+    {signin, signout, signup, clearErrorMessage, tryLocalSignin, accountSave, submitPost, getPosts, getAdminPosts, changePassword, getUsers},
+     {token: null, errorMessage: '', email: '', password: '', firstname: '', lastname: '', memberType: '', isAdmin: false, cohortDate: null, posts: [], adminPosts: [], users: []});
 
 

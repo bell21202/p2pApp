@@ -113,6 +113,20 @@ router.post('/changePassword', requireAuth, async (req, res) => {
     }
 })
 
+router.post('/getUsers', requireAuth, async (req, res) => {
+    try {
+        users = await User.find().sort({firstname: 1});
+        if(!users) {
+            return res.status(422).send({error: 'Users retrieval error'});
+        }
+        res.send({'users': users});
+    }
+    catch (err) {
+        console.log('error during users retreival');
+        return res.status(422).send(err.message);
+    }
+})
+
 const convertHubType = (hubType) => {
     if (hubType == 's' || hubType == 'stm') {
         return hubType;

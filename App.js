@@ -1,7 +1,7 @@
 import React from 'react';
 import {createAppContainer, createSwitchNavigator} from 'react-navigation';
 import {createStackNavigator} from 'react-navigation-stack';
-import {createBottomTabNavigator, createMaterialTopTabNavigator} from 'react-navigation-tabs';
+import {createBottomTabNavigator} from 'react-navigation-tabs';
 
 import SigninScreen from './src/screens/SigninScreen';
 import SignupScreen from './src/screens/SignupScreen';
@@ -16,6 +16,8 @@ import ProfileScreen from './src/screens/ProfileScreen';
 import CreateProfileScreen from './src/screens/CreateProfileScreen';
 import PostDetailScreen from './src/screens/PostDetailScreen';
 import ChangePasswordScreen from './src/screens/ChangePasswordScreen';
+import MessageScreen from './src/screens/MessageScreen';
+import ContactDetailScreen from './src/screens/ContactDetailScreen';
 
 import {Provider as AuthProvider} from './src/context/AuthContext';
 
@@ -30,9 +32,9 @@ const profileFlow = createStackNavigator({
   ChangePassword: ChangePasswordScreen,
 });
 
-const messageFlow = createMaterialTopTabNavigator({
-  Convo: ChatScreen,
-  Contacts: ContactsScreen
+const messageFlow = createStackNavigator({
+  Message: MessageScreen,
+  ContactDetail: ContactDetailScreen,
 });
 
 // can this go?
