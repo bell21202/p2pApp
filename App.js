@@ -18,6 +18,7 @@ import PostDetailScreen from './src/screens/PostDetailScreen';
 import ChangePasswordScreen from './src/screens/ChangePasswordScreen';
 import MessageScreen from './src/screens/MessageScreen';
 import ContactDetailScreen from './src/screens/ContactDetailScreen';
+import ChatDetailScreen from './src/screens/ChatDetailScreen';
 
 import {Provider as AuthProvider} from './src/context/AuthContext';
 
@@ -34,6 +35,7 @@ const profileFlow = createStackNavigator({
 
 const messageFlow = createStackNavigator({
   Message: MessageScreen,
+  ChatDetail: ChatDetailScreen,
   ContactDetail: ContactDetailScreen,
 });
 

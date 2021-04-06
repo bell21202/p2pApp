@@ -7,7 +7,7 @@ import moment from 'moment';
 import { TouchableOpacity } from 'react-native';
 
 var user;
-const ContactDetailScreen = () => {
+const ContactDetailScreen = ({navigation}) => {
 
     var type = memTypeConverter(user.memberType);
     var mem = [];
@@ -39,9 +39,9 @@ const ContactDetailScreen = () => {
                         <Text style={{fontSize: 16}}>{moment(user.cohortDate).calendar()}</Text>
                     </View> : null
                 }
-            </View>      
+            </View>
         </View>
-        <TouchableOpacity> 
+        <TouchableOpacity onPress={() => [navigation.navigate('ChatDetail', {'userToMessage' : user})]}>
             <View style={styles.subContainer}>
                 <Text style={{fontSize: 16, color: '#606060'}}> Message </Text>
                 <Image style={styles.icon} source={require('../img/chat_blueicon.png')} />
@@ -80,7 +80,7 @@ ContactDetailScreen.navigationOptions = ({navigation}) => {
         headerTintColor: 'white',
 
         // slide from right
-        cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS
     }
 }
 

@@ -17,7 +17,7 @@ const MessageScreen = ({navigation}) => {
                 </TouchableOpacity>           
             </View>
             <View style={styles.viewPanel}>
-                {(tabSelect == 'ConvoTab') ? <ChatScreen /> : <ContactsScreen nav={navigation} /> }   
+                {(tabSelect == 'ConvoTab') ? <ChatScreen nav={navigation} /> : <ContactsScreen nav={navigation} /> }
             </View>
         </View>
     );
@@ -65,16 +65,15 @@ const styles = StyleSheet.create({
         paddingLeft: 25,
         paddingRight: 25,
         color: '#2196f3',
-        borderStyle: 'dotted'
     },
     viewPanel: {
-        marginTop: 15,
-        marginLeft: 15,
-        marginRight: 15,
-        borderRadius: 20,
+        marginTop: 5,
+        marginLeft: 5,
+        marginRight: 5,
+        //borderRadius: 20,
         alignContent: 'space-around',
-        height: '90%',
-        padding: 5
+        height: '95%',
+        padding: 5,
     }
 })
 

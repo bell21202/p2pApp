@@ -4,8 +4,11 @@ const jwt = require('jsonwebtoken');
 const requireAuth = require('../middlewares/requireAuth');
 const User = mongoose.model('User');
 const Post = mongoose.model('Post');
+const Message = mongoose.model('Message');
 
 const router = express.Router();
+
+//todo: be sure to use .get instead of post for some of these
 
 router.post('/saveAccount', requireAuth, async (req, res) => {
     const {email, firstname, lastname, memberType, cohortDate} = req.body;
@@ -126,6 +129,210 @@ router.post('/getUsers', requireAuth, async (req, res) => {
         return res.status(422).send(err.message);
     }
 })
+
+router.post('/sendChat', requireAuth, async (req, res) => {
+    const {messageText, messageTo} = req.body;
+    var user = req.user;
+    userId = user._id;
+
+    try{
+        const message = new Message({'text': messageText, 'from': userId, 'to' : messageTo, 'createdAt': Date.now()});
+        await message.save();
+
+        //res.status(200).send('completed');
+        res.send({"newMessage" : message});
+    }
+    catch (err) {
+        console.log("error during sending chat");
+        return res.status(422).send(err.message);
+    }
+})
+
+router.post('/getUserChats', requireAuth, async (req, res) => {
+    var user = req.user;
+    userId = user._id;
+
+    try{
+        const msgToPipeline = [
+          {
+            '$match': {
+              'to': userId.toString()
+            }
+          }, {
+            '$group': {
+              '_id': '$from', 
+              'latestMsg': {
+                '$max': '$createdAt'
+              }, 
+              'doc': {
+                '$push': '$$ROOT'
+              }
+            }
+          }, {
+            '$project': {
+              'doc': {
+                '$filter': {
+                  'input': '$doc', 
+                  'as': 'item', 
+                  'cond': {
+                    '$eq': [
+                      '$$item.createdAt', '$latestMsg'
+                    ]
+                  }
+                }
+              }, 
+              '_id': 0
+            }
+          }, {
+            '$unwind': {
+              'path': '$doc'
+            }
+          }, {
+            '$addFields': {
+              'from_Id': {
+                '$toObjectId': '$doc.from'
+              }
+            }
+          }, {
+            '$lookup': {
+              'from': 'users', 
+              'localField': 'from_Id', 
+              'foreignField': '_id', 
+              'as': 'toArray'
+            }
+          }, {
+            '$unwind': {
+              'path': '$toArray'
+            }
+          }, {
+            '$addFields': {
+              'doc.chatParticipant': '$toArray'
+            }
+          }, {
+            '$project': {
+              'from_Id': 0, 
+              'toArray': 0
+            }
+          }
+        ];
+
+        const msgFromPipeline = [
+          {
+            '$match': {
+              'from': userId.toString()
+            }
+          }, {
+            '$group': {
+              '_id': '$to', 
+              'latestMsg': {
+                '$max': '$createdAt'
+              }, 
+              'doc': {
+                '$push': '$$ROOT'
+              }
+            }
+          }, {
+            '$project': {
+              'doc': {
+                '$filter': {
+                  'input': '$doc', 
+                  'as': 'item', 
+                  'cond': {
+                    '$eq': [
+                      '$$item.createdAt', '$latestMsg'
+                    ]
+                  }
+                }
+              }, 
+              '_id': 0
+            }
+          }, {
+            '$unwind': {
+              'path': '$doc'
+            }
+          }, {
+            '$addFields': {
+              'to_Id': {
+                '$toObjectId': '$doc.to'
+              }
+            }
+          }, {
+            '$lookup': {
+              'from': 'users', 
+              'localField': 'to_Id', 
+              'foreignField': '_id', 
+              'as': 'toArray'
+            }
+          }, {
+            '$unwind': {
+              'path': '$toArray'
+            }
+          }, {
+            '$addFields': {
+              'doc.chatParticipant': '$toArray'
+            }
+          }, {
+            '$project': {
+              'to_Id': 0, 
+              'toArray': 0
+            }
+          }
+        ];
+
+        const chatToCursor = Message.aggregate(msgToPipeline);
+        const chatFromCursor = Message.aggregate(msgFromPipeline);
+        var allChats = [];
+
+        // TODO: potential mem leak here somewhere, cursors closing??
+        (await chatToCursor).forEach(data => {
+            allChats.push(data.doc);
+        });
+
+        (await chatFromCursor).forEach(data => {
+            allChats.push(data.doc);
+        })
+
+        allChats.sort((x,y) => {
+            dateOfMsg1 = x.createdAt;
+            dateOfMsg2 = y.createdAt;
+            return dateOfMsg2 - dateOfMsg1;
+        });
+        res.send({'chats': allChats});
+    }
+    catch(err) {
+        console.log('error during chats retreival');
+        return res.status(422).send(err.message);
+    }
+})
+
+router.post('/getChatHistory', requireAuth, async (req, res) => {
+    const {other} = req.body;
+
+    var user = req.user;
+    userId = user._id
+
+    try{
+        const chatHistory = await Message.find({
+            $or : [{
+                to: other,
+                from: userId
+            }, {
+                to: userId,
+                from: other
+            }]
+        }).sort({createdAt: -1});
+
+        if(!chatHistory) {
+            return res.status(422).send({error: 'chat history retrieval error'});
+        }
+        res.send({'chatHistory': chatHistory});
+    }
+    catch(err) {
+        console.log('error during getting chat history');
+        return res.status(422).send(err.message);
+    }
+})
+
 
 const convertHubType = (hubType) => {
     if (hubType == 's' || hubType == 'stm') {

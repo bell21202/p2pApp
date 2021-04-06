@@ -10,7 +10,7 @@ const authReducer = (state, action) => {
         case 'signin':
             var user = action.payload.user;
             var token = action.payload.token; // todo: research if better to pass in a user and not this long string of state variables
-            return {errorMessage: '', email: user.email, firstname: user.firstname, lastname: user.lastname, memberType: user.memberType, cohortDate: user.cohortDate, isAdmin: user.isAdmin, token: token};
+            return {errorMessage: '', email: user.email, firstname: user.firstname, lastname: user.lastname, memberType: user.memberType, cohortDate: user.cohortDate, isAdmin: user.isAdmin, token: token, userId: user._id};
         case 'clear_error_message':
             return{...state, errorMessage: ''};
         case 'signout':
@@ -33,6 +33,9 @@ const authReducer = (state, action) => {
             return {...state, errorMessage: action.payload}
         case 'getUsers':
             return {...state, users: action.payload.users}
+        case 'sendChat':
+            var newMessage = action.payload.newMessage;
+            return {...state, newMessagePub: newMessage}
         default:
             return state;
     }
@@ -186,9 +189,48 @@ const getUsers = (dispatch) => async () => {
         dispatch({type: 'getUsersError', payload: err});
     }
 }
+/**** Chat Messaging Scheme **********/
+const getUserChats = (dispatch) => async (props) => {
+    try {
+        const response = await app_API.post('/getUserChats');
+        return response.data.chats;  // return directly
+    }
+    catch(err) {
+        console.log(err);
+        dispatch({type: 'getChatsError', payload: err})
+    }
+}
+
+const sendChat = (dispatch) => async (props) => {
+    messageText = props.text;
+    messageTo = props.to;
+
+    try{
+        const response = await app_API.post('/sendChat', {messageText, messageTo});
+
+        // notify all "listeners" of the new message
+        dispatch({type: 'sendChat', payload: response.data});
+    }
+    catch(err) {
+        console.log(err);
+        dispatch({type: 'sendChatError', payload: err})
+    }
+}
+
+const getChatHistory = (dispatch) => async (props) => {
+    other = props.other;
+    try{
+        const response = await app_API.post('/getChatHistory', {other});
+        return response.data.chatHistory;  // return directly
+    }
+    catch(err) {
+        console.log(err);
+        dispatch({type: 'getChatHistoryError', payload: err});
+    }
+}
 
 export const {Provider, Context} = createDataContext(authReducer,
-    {signin, signout, signup, clearErrorMessage, tryLocalSignin, accountSave, submitPost, getPosts, getAdminPosts, changePassword, getUsers},
-     {token: null, errorMessage: '', email: '', password: '', firstname: '', lastname: '', memberType: '', isAdmin: false, cohortDate: null, posts: [], adminPosts: [], users: []});
+    {signin, signout, signup, clearErrorMessage, tryLocalSignin, accountSave, submitPost, getPosts, getAdminPosts, changePassword, getUsers, getUserChats, sendChat, getChatHistory},
+     {token: null, errorMessage: '', email: '', password: '', firstname: '', lastname: '', memberType: '', isAdmin: false, cohortDate: null, posts: [], adminPosts: [], users: [], userId: '', newMessagePub: null});
 
 
