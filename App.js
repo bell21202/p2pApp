@@ -2,6 +2,7 @@ import React from 'react';
 import {createAppContainer, createSwitchNavigator} from 'react-navigation';
 import {createStackNavigator} from 'react-navigation-stack';
 import {createBottomTabNavigator} from 'react-navigation-tabs';
+import {Icon} from 'react-native-elements';
 
 import SigninScreen from './src/screens/SigninScreen';
 import SignupScreen from './src/screens/SignupScreen';
@@ -67,10 +68,43 @@ const switchNavigator = createSwitchNavigator({
     CreateProfile: CreateProfileScreen
   }),*/
   mainFlow: createBottomTabNavigator({
-      Home: hubFlow,
-      Profile: profileFlow,
-      Notifications: notificationsFlow,
-      Chat: messageFlow
+      Home: {
+        screen: hubFlow,
+        navigationOptions: {
+          tabBarIcon:({focused}) => (
+            <Icon name="home" type='material' color={focused ? '#2196f3' : '#c0c0c0'} size={25} />
+          ),
+      }},
+      Profile: {
+        screen: profileFlow,
+        navigationOptions: {
+          tabBarIcon:({focused}) => (
+            <Icon name="person-add" type='material' color={focused ? '#2196f3' : '#c0c0c0'} size={28} />
+          ),
+      }},
+      Notifications: {
+        screen: notificationsFlow,
+        navigationOptions: {
+          tabBarIcon: ({focused}) => (
+            <Icon name="notifications-active" type='material' color={focused ? '#2196f3' : '#c0c0c0'} size={25} />
+          ),
+      }},
+      Chat: {
+        screen: messageFlow,
+        navigationOptions: {
+          tabBarIcon: ({focused}) => (
+            <Icon name="message" type="entypo"  color={focused ? '#2196f3' : '#c0c0c0'} size={25} />
+          ),
+      }},
+      },{
+    tabBarOptions: {
+      style: {
+        paddingBottom: 2
+      },
+      activeTintColor: '#2196f3',
+      inactiveTintColor: '#c0c0c0'
+    },
+
   }),
 });
 
