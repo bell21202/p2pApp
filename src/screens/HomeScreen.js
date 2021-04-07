@@ -39,7 +39,7 @@ const HomeSreen = ({navigation}) => {
                                     <Text style={styles.categoryText}> Profile </Text>
                                 </Category>
                                 <Category routeName={'Message'}>
-                                    <Image style={styles.icon} source={require('../img/chat_icon.png')} />
+                                    <Image style={styles.icon} source={require('../img/chat_bubble_icon.png')} />
                                     <Text style={styles.categoryText}> Chat </Text>
                                 </Category>
                                 <Category routeName={'Community Hub'}>
