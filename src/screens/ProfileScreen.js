@@ -16,6 +16,7 @@ const ProfileScreen = ({navigation}) => {
 
     // todo: place in helper location
     formatConverter(type, mem);
+    var memberT = mem.toString().replace(/,/g," + "); // not sure about this regex here!
     
     return (
     <View>
@@ -30,7 +31,7 @@ const ProfileScreen = ({navigation}) => {
             </Spacer>
         </View>
         <View style={styles.headerName}>
-            <Text> {firstname} </Text>
+            <Text style={{fontSize: 18, color: '#606060'}}> {firstname} </Text>
         </View>
         <TouchableOpacity style={styles.button}>
             <Text style={styles.buttonText} onPress={() => navigation.navigate('EditProfile')}> Edit Profile </Text>
@@ -41,7 +42,7 @@ const ProfileScreen = ({navigation}) => {
                 lastname={lastname}
                 email={email}
                 // do conversions for types
-                membertype={mem.toString()}
+                membertype={memberT}
                 gradyear={cohortDate ? moment(cohortDate).calendar() : null}
             />
         </View>
