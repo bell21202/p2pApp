@@ -3,14 +3,13 @@ import {TouchableOpacity, Image, StyleSheet, Text} from 'react-native';
 import {withNavigation} from 'react-navigation';
 
 const Category = ({children, routeName, navigation }) => {
-    var hubTitle = routeName;
-    
-    if (routeName != null && routeName.includes('Hub')) {
-        // reset to real routename
-        routeName = 'Hub';
+    if(routeName == 'Scholars Hub') {
+        routeName = 'ScholarHub';
+    } else if(routeName == 'Community Hub') {
+        routeName = 'CommHub';
     }
     return (
-        <TouchableOpacity style={styles.container} onPress ={() => navigation.navigate(routeName, {hubTitle})}>
+        <TouchableOpacity style={styles.container} onPress ={() => navigation.navigate(routeName)}>
             {children}
         </TouchableOpacity>
     )

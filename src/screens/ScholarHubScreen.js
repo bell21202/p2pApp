@@ -9,9 +9,9 @@ import { Switch } from 'react-native-paper';
 
 var hubType;
 
-const HubScreen = ({navigation}) => {
+const ScholarHubScreen = ({navigation}) => {
     const {state, submitPost, getPosts} = useContext(AuthContext);
-    const {posts} = state;
+    const {sPosts} = state;
     const [visible, setVisible] = useState(false);
 
     // admin related
@@ -49,7 +49,7 @@ const HubScreen = ({navigation}) => {
     }
 
     useEffect(() => {
-        console.log('in use effect hubscreen');
+        console.log('in use effect scholar hubscreen');
         BackHandler.addEventListener('hardwareBackPress', backNavigation);
         if (inputRef != null) {
             inputRef.focus();
@@ -63,7 +63,7 @@ const HubScreen = ({navigation}) => {
     }, [visible]); // todo: come back to this, do we need to run use effect so much??
 
     const fetchPosts = async () => {
-        console.log('running fetchposts from hubscreen');
+        console.log('running fetchposts from scholar hubscreen');
         isLoading = true;
 
         try {
@@ -92,7 +92,7 @@ const HubScreen = ({navigation}) => {
     const constructPost = (post) => {
         // we only want posts not replies
         if(post.item.parentId == null) {
-            var replies = getPostRepliesById(post.item._id, posts);
+            var replies = getPostRepliesById(post.item._id, sPosts);
             return (
                 <TouchableOpacity onPress={() => navigation.navigate('PostDetail', {'post' : post.item})}> 
                     <Post post={post.item} replyCount={replies.length} showInteractiveBar />
@@ -110,7 +110,7 @@ const HubScreen = ({navigation}) => {
     <>
         <View style={styles.container}>
             <FlatList
-                data={posts}
+                data={sPosts}
                 renderItem={(item) => constructPost(item)}
                 keyExtractor={(item) => item._id}
                 refreshing={isLoading}
@@ -158,13 +158,11 @@ const HubScreen = ({navigation}) => {
     );
 };
 
-HubScreen.navigationOptions = ({navigation}) => {
-    var {state} = navigation;
-    title = state.params.hubTitle;
-    hubType = title;
+ScholarHubScreen.navigationOptions = () => {
+    hubType = 's';
     
     return {
-        title: title,
+        title: "Scholars Hub",
         headerTitleAlign: 'center',
         headerStyle: {
             backgroundColor: '#2196f3',   
@@ -208,4 +206,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default HubScreen;
+export default ScholarHubScreen;

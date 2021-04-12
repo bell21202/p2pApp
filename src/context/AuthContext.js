@@ -20,9 +20,17 @@ const authReducer = (state, action) => {
         case 'accountSaveError':
             return {...state, errorMessage: action.payload};
         case 'submitPost':
-            return {...state, posts: action.payload.posts, adminPosts: action.payload.posts};
+            if(action.payload.hubType == 's'){
+                return {...state, sPosts: action.payload.posts, adminPosts: action.payload.posts};
+            } else if(action.payload.hubType == 'stm') {
+                return {...state, cPosts: action.payload.posts, adminPosts: action.payload.posts};
+            }
         case 'getPosts':
-            return {...state, posts: action.payload.posts}
+            if(action.payload.hubType == 's'){
+                return {...state, sPosts: action.payload.posts}
+            } else if(action.payload.hubType == 'stm') {
+                return {...state, cPosts: action.payload.posts}
+            }
         case 'getAdminPosts':
             return {...state, adminPosts: action.payload.posts}
         case 'getPostsError':
@@ -149,6 +157,7 @@ const submitPost = (dispatch) => async  (props) => {
 
     try {
         const response = await app_API.post('/submitPost', {postText, hubType, firstname, lastname, parentId, isAdmin});
+        response.data.hubType = props.hubType;
         dispatch({type: 'submitPost', payload: response.data});
     }
     catch(err) {
@@ -160,6 +169,7 @@ const submitPost = (dispatch) => async  (props) => {
 const getPosts = (dispatch) => async (props) => {
     try{  
         const response = await app_API.post('/getPosts', {"hubType" : props.hubType});
+        response.data.hubType = props.hubType;
         dispatch({type: 'getPosts', payload: response.data})
     }
     catch(err) {
@@ -231,6 +241,6 @@ const getChatHistory = (dispatch) => async (props) => {
 
 export const {Provider, Context} = createDataContext(authReducer,
     {signin, signout, signup, clearErrorMessage, tryLocalSignin, accountSave, submitPost, getPosts, getAdminPosts, changePassword, getUsers, getUserChats, sendChat, getChatHistory},
-     {token: null, errorMessage: '', email: '', password: '', firstname: '', lastname: '', memberType: '', isAdmin: false, cohortDate: null, posts: [], adminPosts: [], users: [], userId: '', newMessagePub: null});
+     {token: null, errorMessage: '', email: '', password: '', firstname: '', lastname: '', memberType: '', isAdmin: false, cohortDate: null, sPosts: [], cPosts: [], adminPosts: [], users: [], userId: '', newMessagePub: null});
 
 

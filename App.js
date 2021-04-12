@@ -11,7 +11,8 @@ import ContactsScreen from './src/screens/ContactsScreen';
 import EditProfileScreen from './src/screens/EditProfileScreen';
 import GroupScreen from './src/screens/GroupScreen';
 import HomeScreen from './src/screens/HomeScreen';
-import HubScreen from './src/screens/HubScreen';
+import ScholarHubScreen from './src/screens/ScholarHubScreen';
+import CommunityHubScreen from './src/screens/CommunityHubScreen';
 import NotificationScreen from './src/screens/NotificationScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import CreateProfileScreen from './src/screens/CreateProfileScreen';
@@ -48,7 +49,8 @@ const authFlow = createStackNavigator({
 
 const hubFlow = createStackNavigator({
   Home: HomeScreen,
-  Hub: HubScreen,
+  ScholarHub: ScholarHubScreen,
+  CommHub: CommunityHubScreen,
   PostDetail: PostDetailScreen,
 });
 

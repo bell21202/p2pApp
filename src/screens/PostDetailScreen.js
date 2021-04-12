@@ -9,12 +9,12 @@ var parentPost;
 
 const PostDetailScreen = ({navigation}) => {
     const {submitPost, getPosts, state} = useContext(AuthContext);
-    const {posts} = state;
+    const {cPosts, sPosts} = state;
 
     var navState = navigation.state;
     parentPost = navState.params.post;
 
-    // this is a bug, this data (firstname, lastnmae) should really be coming from the current user for submitting post
+    // todo: this is a bug, this data (firstname, lastnmae) should really be coming from the current user for submitting post
     var firstname = parentPost.firstname;
     var lastname = parentPost.lastname
     var firstLetterInName = firstname.charAt(0);
@@ -25,13 +25,14 @@ const PostDetailScreen = ({navigation}) => {
     var inputRef = null;
     var isLoading = false;
 
+
+    // posts of concern related to the parent post
+    var posts = (hubType == 's') ? sPosts : cPosts;
     var replies = getPostRepliesById(parentPost._id, posts);
 
     // preserve the reply count before adding the parent post
     var replyCount = replies.length;
     replies.unshift(parentPost);
-
-    console.log('rendering in detail screen');
 
     const constructPostReply = (post) => {
         return (
@@ -65,7 +66,7 @@ const PostDetailScreen = ({navigation}) => {
 
     return(
         <View style={styles.container}>
-            <View style={styles.repliesContainer}> 
+            <View style={styles.repliesContainer}>
                 <FlatList
                     data={replies}
                     renderItem={(item) => constructPostReply(item)}
