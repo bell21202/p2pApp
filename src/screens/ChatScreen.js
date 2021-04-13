@@ -32,12 +32,13 @@ const ChatScreen = ({nav}) => {
             });
             setUserChats(consolidatedChats);
         } catch(err) {
-            // todo what to do here??
+            // todo_log statement
         }
     }
 
     const constructUserChat = (chatMessage) => {
-        // todo: add null checks here and/or server
+        // todo_pp: case of somebody editing their profile while a user sends a mesage
+        // to this person, null checks for empty values
         var participant = chatMessage.item.chatParticipant;
         var fname = participant.firstname;
         var lname = participant.lastname;

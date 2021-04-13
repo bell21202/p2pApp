@@ -4,17 +4,16 @@ import {Avatar} from 'react-native-elements';
 import {Context as AuthContext} from '../context/AuthContext';
 import Spacer from '../components/Spacer';
 import DisplayProfileForm from '../components/DisplayProfileForm';
-import memTypeConverter from '../helpers/memTypeConverter';
+import memberHelper, {formatConverter} from '../helpers/memTypeConverter';
 import moment from 'moment';
 
 const ProfileScreen = ({navigation}) => {
     const {state} = useContext(AuthContext);
     const {firstname, lastname, email, cohortDate, memberType} = state;
 
-    var type = memTypeConverter(memberType);
+    var type = memberHelper(memberType);
     var mem = [];
-
-    // todo: place in helper location
+    
     formatConverter(type, mem);
     var memberT = mem.toString().replace(/,/g," + "); // not sure about this regex here!
     
@@ -50,21 +49,6 @@ const ProfileScreen = ({navigation}) => {
 
     );
 }
-
-const formatConverter = (type, mem) => {
-    if(type.tutor)
-    {
-        mem.push("Tutor");
-    }
-    if(type.mentor)
-    {
-        mem.push("Mentor");
-    }
-    if(type.scholar)
-    {
-        mem.push("Scholar");
-    }
-};
 
 ProfileScreen.navigationOptions = ({navigation}) => {
     var {state} = navigation;

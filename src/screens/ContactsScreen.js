@@ -18,7 +18,7 @@ const ContactsScreen = ({nav}) => {
             await getUsers({});
         }
         catch(err){
-            // todo what to do here??
+            // todo_log statement
         }
     }
 

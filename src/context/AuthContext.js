@@ -49,7 +49,7 @@ const authReducer = (state, action) => {
     }
 };
 
-// update token state here
+// update token state here, fix this with the signout function too
 const tryLocalSignin = dispatch => async () => {
     try{
         token = await AsyncStorage.getItem('token') // should this string be unique?
@@ -107,7 +107,6 @@ const signout = (dispatch) => async () => {
     }
     catch(err){}
    
-    // todo: do we want to show an error payload?
     dispatch({type: 'signout'});
     navigate('initFlow');
 };

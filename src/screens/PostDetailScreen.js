@@ -9,22 +9,17 @@ var parentPost;
 
 const PostDetailScreen = ({navigation}) => {
     const {submitPost, getPosts, state} = useContext(AuthContext);
-    const {cPosts, sPosts} = state;
+    const {cPosts, sPosts, firstname, lastname} = state;
 
     var navState = navigation.state;
     parentPost = navState.params.post;
-
-    // todo: this is a bug, this data (firstname, lastnmae) should really be coming from the current user for submitting post
-    var firstname = parentPost.firstname;
-    var lastname = parentPost.lastname
+     
     var firstLetterInName = firstname.charAt(0);
-    
     var hubType = parentPost.hubType;
     var parentId = parentPost._id;
 
     var inputRef = null;
     var isLoading = false;
-
 
     // posts of concern related to the parent post
     var posts = (hubType == 's') ? sPosts : cPosts;
@@ -59,7 +54,7 @@ const PostDetailScreen = ({navigation}) => {
             await getPosts({hubType});
         }
         catch(err) {
-            console.log("error in fetch posts"); // change later
+            // todo_log statement
         }
         isLoading = false;
     };

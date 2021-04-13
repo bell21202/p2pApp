@@ -54,9 +54,13 @@ const EditProfileForm = ({nav}) => {
         else if(emailIn === null || emailIn === undefined || emailIn.match(/^ *$/) !== null){
             setInternalErr('Email cannot be blank.')
         }
-        // todo: should we require a member type..come back
+        // todo_pp: confirm if this should really be required
+        /*
+        else if(memberTypeIn === null || memberTypeIn === undefined || memberTypeIn == ''){
+            setInternalErr('Must select a member type.');
+        }*/
         else{
-            setInternalErr('');
+            setInternalErr(null);
             accountSave({emailIn, firstnameIn, lastnameIn, memberTypeIn, cohortDateIn})
         }
     };
@@ -126,7 +130,7 @@ const EditProfileForm = ({nav}) => {
                     mode={'outlined'}
                     label={"Graduation Year"}
                     value={cohortDateIn ? moment(cohortDateIn).calendar() : 'mm/dd/yyyy'}
-                    style={{height: 35, width: 175}} // todo: is this a problem??
+                    style={{height: 35, width: '55%'}}
                     theme={{ colors: { text: 'black', primary: '#2196f3' }}}
                     // set editable based on if they are a scholar
                     editable={type.scholar}

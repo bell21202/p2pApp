@@ -8,7 +8,7 @@ const Message = mongoose.model('Message');
 
 const router = express.Router();
 
-//todo: be sure to use .get instead of post for some of these
+//todo_pp: be sure to use .get instead of post for some of these, and in authcontext
 
 router.post('/saveAccount', requireAuth, async (req, res) => {
     const {email, firstname, lastname, memberType, cohortDate} = req.body;
@@ -108,7 +108,7 @@ router.post('/changePassword', requireAuth, async (req, res) => {
                 throw err;
             }
         });
-        res.status(200).send('completed'); // todo: make into constant values
+        res.status(200).send('completed');
     }
     catch(err) {
         // the entered password doesn't match
@@ -283,7 +283,6 @@ router.post('/getUserChats', requireAuth, async (req, res) => {
         const chatFromCursor = Message.aggregate(msgFromPipeline);
         var allChats = [];
 
-        // TODO: potential mem leak here somewhere, cursors closing??
         (await chatToCursor).forEach(data => {
             allChats.push(data.doc);
         });
@@ -333,7 +332,7 @@ router.post('/getChatHistory', requireAuth, async (req, res) => {
     }
 })
 
-
+// todo_pp: later change to just c or something
 const convertHubType = (hubType) => {
     if (hubType == 's' || hubType == 'stm') {
         return hubType;

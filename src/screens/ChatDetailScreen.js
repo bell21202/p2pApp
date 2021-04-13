@@ -12,16 +12,13 @@ var fLRef;
 const ChatDetailScreen = () => {
     const {state, sendChat, getChatHistory} = useContext(AuthContext);
     const {newMessagePub} = state;
-    //const {userId} = state;
+    const {userId} = state;
     const [chats, setChats] = useState(null);
     const [newMsgId, setNewMsgId] = useState(null);
 
     var isLoading = false;
     var inputRef = null;
     var dayOfMsg = null;
-
-    // TODO: remove later
-    var userId = '6025a721bfa923080ae0d5f1';
 
     useEffect(() => {
         // incoming new messages
@@ -58,7 +55,7 @@ const ChatDetailScreen = () => {
             setChats(chats);
 
         } catch(err) {
-            // todo what to do here??
+            // todo_log statement
         }
     }
 

@@ -2,14 +2,14 @@ import React from 'react';
 import {View, StyleSheet, Text, Image} from 'react-native';
 import { CardStyleInterpolators } from 'react-navigation-stack';
 import UserAvatar from '../components/UserAvatar';
-import memTypeConverter from '../helpers/memTypeConverter';
+import memberHelper, {formatConverter} from '../helpers/memTypeConverter';
 import moment from 'moment';
 import { TouchableOpacity } from 'react-native';
 
 var user;
 const ContactDetailScreen = ({navigation}) => {
 
-    var type = memTypeConverter(user.memberType);
+    var type = memberHelper(user.memberType);
     var mem = [];
     formatConverter(type, mem);
 
@@ -49,22 +49,6 @@ const ContactDetailScreen = ({navigation}) => {
         </TouchableOpacity>
         </View>
     )
-};
-
-// todo: put in helper location
-const formatConverter = (type, mem) => {
-    if(type.tutor)
-    {
-        mem.push("Tutor");
-    }
-    if(type.mentor)
-    {
-        mem.push("Mentor");
-    }
-    if(type.scholar)
-    {
-        mem.push("Scholar");
-    }
 };
 
 ContactDetailScreen.navigationOptions = ({navigation}) => {

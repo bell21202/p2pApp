@@ -60,7 +60,7 @@ const ScholarHubScreen = ({navigation}) => {
         return function cleanup() {
             BackHandler.removeEventListener('hardwareBackPress', backNavigation);
         }
-    }, [visible]); // todo: come back to this, do we need to run use effect so much??
+    }, [visible]);
 
     const fetchPosts = async () => {
         console.log('running fetchposts from scholar hubscreen');
