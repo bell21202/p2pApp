@@ -49,6 +49,7 @@ const authReducer = (state, action) => {
     }
 };
 
+/**** Authentication Scheme **********/
 // update token state here, fix this with the signout function too
 const tryLocalSignin = dispatch => async () => {
     try{
@@ -104,11 +105,12 @@ const signin = dispatch => async ({email, password}) => {
 const signout = (dispatch) => async () => {
     try {
         await AsyncStorage.removeItem('token');
+        dispatch({type: 'signout'}); // wipe out the state
+        navigate('initFlow');
     }
-    catch(err){}
-   
-    dispatch({type: 'signout'});
-    navigate('initFlow');
+    catch(err){
+        // todo_log statement
+    }
 };
 
 const accountSave = (dispatch) => async (props) => {

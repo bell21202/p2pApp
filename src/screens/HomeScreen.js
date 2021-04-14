@@ -1,17 +1,14 @@
-import React, {useContext} from 'react';
-import {Text, View, StyleSheet, Image} from 'react-native';
+import React, {useContext, useState} from 'react';
+import {Text, View, StyleSheet, Image, TouchableOpacity} from 'react-native';
 import Spacer from '../components/Spacer';
 import Category from '../components/Category';
 import {Context as AuthContext} from '../context/AuthContext';
+import {Icon, Overlay} from 'react-native-elements';
 
 const HomeSreen = ({navigation}) => {
     const {signout, state} = useContext(AuthContext);
     const {firstname} = state;
-
-    /* they've signed out
-    if(!token){
-        navigation.navigate('Signin')
-    }*/
+    const [visible, setVisible] = useState(false);
 
     return (
             <View>
@@ -19,7 +16,23 @@ const HomeSreen = ({navigation}) => {
                 <View style={styles.sideView}>
                     <View style={styles.innerView}>
                         <View style={styles.headerView}>
-                            <Spacer> 
+                            <Icon name="exit-to-app" type='material-community' color={'#2196f3'} containerStyle={{alignSelf: 'flex-end'}} size={25} onPress={() => setVisible(!visible)} />
+                            <Overlay overlayStyle={styles.overlay} isVisible={visible} onBackdropPress={() => setVisible(!visible)}>
+                                <View>
+                                    <Text style={{color: 'black', fontSize: 18}}>Sign Out</Text>
+                                    <Text style={{color: 'black', marginTop: 20}}>Are you sure you want to logout?</Text>
+                                    <View style={{flexDirection: 'row', width: '70%', alignSelf: 'flex-end', marginTop: 30}}>
+                                        <TouchableOpacity style={styles.modalButton} onPress={() => signout({})}>
+                                            <Text style={{color: 'white'}}>Log Out</Text>
+                                        </TouchableOpacity>
+                                        <Spacer />
+                                        <TouchableOpacity style={styles.modalButton} onPress={() => setVisible(!visible)}>
+                                            <Text style={{color: 'white'}}>Cancel</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </Overlay>
+                            <Spacer>
                                 <Text style={{fontSize: 24, color: '#2c2423'}}> Hi {firstname}! </Text>
                                 <Spacer />
                                 <Text style={{fontSize: 24, color: '#2c2423'}}> Welcome to </Text>
@@ -75,7 +88,7 @@ HomeSreen.navigationOptions = () => {
 
 const styles = StyleSheet.create({
     headerView: {
-        marginTop: 35,
+        marginTop: 20,
         marginRight: 20,
         marginLeft: 25
     },
@@ -108,6 +121,23 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         width:35,
         height:35
+    },
+    overlay: {
+        width: '80%',
+        height: 160,
+        marginLeft: 30,
+        marginRight: 20,
+        borderRadius: 5,
+        padding: 15,
+        opacity: .75
+    },
+    modalButton: {
+        backgroundColor: '#2196f3',
+        paddingLeft: 20,
+        paddingRight: 20,
+        paddingTop: 10,
+        paddingBottom: 10,
+        borderRadius: 5
     }
 });
 
