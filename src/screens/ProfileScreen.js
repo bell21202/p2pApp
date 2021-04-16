@@ -46,9 +46,11 @@ const ProfileScreen = ({navigation}) => {
                 gradyear={cohortDate ? moment(cohortDate).calendar() : null}
             />
         </View>
-        <TouchableOpacity onPress={() => setVisible(!visible)}>
-            <Text style={{color: '#aaaaaa', marginTop: '40%', alignSelf: 'center', fontSize: 16}}>Sign Out</Text>
-        </TouchableOpacity>
+        <View style={{alignItems: 'center', marginTop: '40%'}}>
+            <TouchableOpacity onPress={() => setVisible(!visible)}>
+                <Text style={{color: '#aaaaaa', fontSize: 16}}>Sign Out</Text>
+            </TouchableOpacity>
+        </View>
         <Overlay overlayStyle={styles.overlay} isVisible={visible} onBackdropPress={() => setVisible(!visible)}>
             <View>
                 <Text style={{color: 'black', fontSize: 18}}>Sign Out</Text>
