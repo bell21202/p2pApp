@@ -3,6 +3,7 @@ import {StyleSheet, View} from 'react-native';
 import EditProfileForm from '../components/EditProfileForm';
 import {Avatar} from 'react-native-elements';
 import Spacer from '../components/Spacer';
+import { CardStyleInterpolators } from 'react-navigation-stack';
 
 const EditProfileScreen = ({navigation}) => {
     return (
@@ -32,7 +33,11 @@ EditProfileScreen.navigationOptions = () => {
         headerStyle: {
             backgroundColor: '#2196f3'
         },
-        headerTintColor: 'white'
+        headerTintColor: 'white',
+
+        // slide from right
+        cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS
+
     }
 }
 

@@ -4,6 +4,8 @@ import CustomInput from '../components/CustomInput';
 import Spacer from '../components/Spacer';
 import InitStyle from '../stylecomponents/InitStyle';
 import {Context as AuthContext} from '../context/AuthContext';
+import { CardStyleInterpolators } from 'react-navigation-stack';
+
 
 var nav;
 const ChangePasswordScreen = () => {
@@ -99,7 +101,11 @@ ChangePasswordScreen.navigationOptions = ({navigation}) => {
         headerStyle: {
             backgroundColor: '#2196f3'
         },
-        headerTintColor: 'white'
+        headerTintColor: 'white',
+
+        // slide from right
+        cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS
+
     }
 }
 

@@ -1,5 +1,5 @@
 import React, {useContext, useState} from 'react';
-import {Text, View, StyleSheet, TouchableOpacity} from 'react-native';
+import {Text, View, StyleSheet, TouchableOpacity, ToastAndroid, Platform, Alert} from 'react-native';
 import Spacer from '../components/Spacer';
 import {Context as AuthContext} from '../context/AuthContext';
 import {NavigationEvents, SafeAreaView} from 'react-navigation';
@@ -36,6 +36,14 @@ const EditProfileForm = ({nav}) => {
         }
     };
 
+    const saveConfirmation = (msg) => {
+        if(Platform.OS == 'android') {
+            ToastAndroid.show(msg, ToastAndroid.SHORT)
+        } else{
+            Alert.alert(msg); // todo_pp: what does this really show on ios??
+        }
+    }
+
     // event handler from check boxes
     const checkboxHandler = () => {
         var val = memTypeConverter({t : type.tutor, m : type.mentor, s: type.scholar});
@@ -62,6 +70,12 @@ const EditProfileForm = ({nav}) => {
         else{
             setInternalErr(null);
             accountSave({emailIn, firstnameIn, lastnameIn, memberTypeIn, cohortDateIn})
+
+            // show confirmation, only aftr initial login
+            if(nav.state.routeName == 'EditProfile')
+            {
+                saveConfirmation('Saved');
+            }
         }
     };
 
