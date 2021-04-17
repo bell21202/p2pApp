@@ -2,7 +2,7 @@ import React, {useContext, useState} from 'react';
 import {Text, View, StyleSheet, TouchableOpacity, ToastAndroid, Platform, Alert} from 'react-native';
 import Spacer from '../components/Spacer';
 import {Context as AuthContext} from '../context/AuthContext';
-import {NavigationEvents, SafeAreaView} from 'react-navigation';
+import {NavigationEvents} from 'react-navigation';
 import CustomInput from '../components/CustomInput';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
@@ -10,7 +10,8 @@ import memTypeConverter from '../helpers/memTypeConverter';
 import { Checkbox } from 'react-native-paper';
 import InitStyle from '../stylecomponents/InitStyle';
 import {navigate} from '../navigationRef';
-
+import {Avatar} from 'react-native-elements';
+import UserAvatar from '../components/UserAvatar';
 
 const EditProfileForm = ({nav}) => {
     const {state, accountSave, clearErrorMessage} = useContext(AuthContext);
@@ -24,6 +25,8 @@ const EditProfileForm = ({nav}) => {
     const [cohortDateIn, setCohortDate] = useState(cohortDate);
     const [visible, setVisible] = useState(false);
     const [internalErr, setInternalErr] = useState(null);
+
+    var showTitle = false;
 
     // event handler from date picker
     const datePicked = (event, selectedDate) => {
@@ -79,8 +82,24 @@ const EditProfileForm = ({nav}) => {
         }
     };
 
+    // switch up the avatar image
+    if(firstnameIn != null || firstnameIn != '')
+    {
+        showTitle = true;
+    }
+
     return (
     <View>
+        <View style={styles.headerView}>
+            <Spacer>
+            {showTitle ?
+                <UserAvatar size={'large'} title={firstnameIn.charAt(0)} color={'#f7f6f6'} />
+                :
+                <Avatar rounded icon={{name: 'camera', type: 'font-awesome'}} overlayContainerStyle={{backgroundColor: 'lightgray'}} size={'large'} />
+            }
+            </Spacer>
+        </View>
+
         <NavigationEvents onWillFocus={clearErrorMessage} />
         <View style={InitStyle.textView}>
         <Spacer>
@@ -183,6 +202,10 @@ const styles = StyleSheet.create({
         marginLeft: 20,
         marginRight: 20,
         marginTop: 50,
+    },
+    headerView: {
+        alignItems: 'center',
+        marginTop: '5%'
     },
     errorMessage: {
         fontSize: 16, 

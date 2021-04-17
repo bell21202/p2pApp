@@ -6,6 +6,7 @@ import Spacer from '../components/Spacer';
 import DisplayProfileForm from '../components/DisplayProfileForm';
 import memberHelper, {formatConverter} from '../helpers/memTypeConverter';
 import moment from 'moment';
+import UserAvatar from '../components/UserAvatar';
 
 const ProfileScreen = ({navigation}) => {
     const {state} = useContext(AuthContext);
@@ -14,20 +15,27 @@ const ProfileScreen = ({navigation}) => {
 
     var type = memberHelper(memberType);
     var mem = [];
+    var showTitle = false;
 
     formatConverter(type, mem);
     var memberT = mem.toString().replace(/,/g," + "); // not sure about this regex here!
 
+    // switch up the avatar image
+    if(firstname != null || firstname != '')
+    {
+        showTitle = true;
+    }
+
     return (
     <View>
         <View style={styles.headerView}>
-            <Spacer> 
-            <Avatar
-                rounded
-                icon={{name: 'camera', type: 'font-awesome'}}
-                overlayContainerStyle={{backgroundColor: 'lightgray'}}
-                size={'large'}
-            />
+            <Spacer>
+
+            {showTitle ?
+                <UserAvatar size={'large'} title={firstname.charAt(0)} color={'#f7f6f6'} />
+                :
+                <Avatar rounded icon={{name: 'camera', type: 'font-awesome'}} overlayContainerStyle={{backgroundColor: 'lightgray'}} size={'large'} />
+            }
             </Spacer>
         </View>
         <View style={styles.headerName}>
@@ -75,8 +83,6 @@ ProfileScreen.navigationOptions = ({navigation}) => {
     var {state} = navigation;
     title = state.routeName;
 
-    // title = state.params.hubTitle; why doesn't this work..
-    
     return {
         title: title,
         headerTitleAlign: 'center',
