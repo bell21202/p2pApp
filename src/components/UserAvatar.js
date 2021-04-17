@@ -8,7 +8,7 @@ const UserAvatar = (props) => {
     var color = props.color ? props.color : 'white';
     var sourceimage = props.sourceimage ? props.sourceimage : null;
     var containerStyle = props.containerStyle ? props.containerStyle : null;
-    var outlineColor =  colorGen(title);
+    var outlineColor =  props.titleColor ? props.titleColor : colorGen(title);
     
     return (
         <>

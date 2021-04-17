@@ -133,7 +133,7 @@ const CommunityHubScreen = ({navigation}) => {
             <View style={[styles.postInputView, visible ? {width: '100%'} : {width: '0'}]}> 
                 <PostInput ref={input  => inputRef = input} title={firstLetterInName} placeholder={'Add a post'} />
                 <TouchableOpacity onPress={() => isUserAdmin()}>
-                    <Image style={styles.iconStyle} source={require('../img/planeFill_icon.png')} />
+                    <Icon name="paper-plane" type='font-awesome' color={'#2196f3'} containerStyle={{marginLeft: 5}} />
                 </TouchableOpacity>
             </View>
         }
@@ -188,12 +188,9 @@ const styles = StyleSheet.create({
         bottom: 0,
         right: 0,
         flexDirection: 'row',
-        backgroundColor: 'black',
-        opacity: .75 
-    },
-    iconStyle: {
-        marginTop: 20, 
-        marginLeft: -10
+        backgroundColor: 'lightgray',
+        width: '100%',
+        alignItems: 'center',
     },
     adminSwitch: {
         flexDirection: 'row',

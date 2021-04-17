@@ -1,9 +1,10 @@
-import React, {useContext, useState} from 'react';
-import {StyleSheet, View, Text, TouchableOpacity, Image, FlatList} from 'react-native';
+import React, {useContext} from 'react';
+import {StyleSheet, View, TouchableOpacity, FlatList} from 'react-native';
 import {Context as AuthContext} from '../context/AuthContext';
 import PostInput from '../components/PostInput';
 import Post from '../components/Post';
 import {getPostRepliesById} from '../helpers/getPostsRelationship';
+import {Icon} from 'react-native-elements';
 
 var parentPost;
 
@@ -74,7 +75,7 @@ const PostDetailScreen = ({navigation}) => {
             <View style={styles.postInputView}>
                 <PostInput ref={input => inputRef = input} title={firstLetterInName} placeholder={'Add a comment...'} />
                 <TouchableOpacity onPress={() => [submitPost({"value" : inputRef.props.value, hubType, firstname, lastname, 'parentId' : parentId}), resetInput()]}>
-                    <Image style={styles.iconStyle} source={require('../img/planeFill_icon.png')} />
+                    <Icon name="paper-plane" type='font-awesome' color={'#2196f3'} containerStyle={{marginLeft: 5}} />
                 </TouchableOpacity>
             </View>  
         </View>
@@ -105,9 +106,9 @@ const styles = StyleSheet.create({
         bottom: 0,
         right: 0,
         flexDirection: 'row',
-        backgroundColor: 'black',
-        opacity: .75,
-        width: '100%'
+        backgroundColor: 'lightgray',
+        width: '100%',
+        alignItems: 'center',
     },
     iconStyle: {
         marginTop: 20, 
