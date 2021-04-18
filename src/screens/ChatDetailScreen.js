@@ -96,7 +96,7 @@ const ChatDetailScreen = () => {
                         null
                     }
                     {(!userToMessage.image_url && side == 'left') ?
-                        <UserAvatar size={35} title={userToMessage.firstname.charAt(0)} />
+                        <UserAvatar size={35} title={userToMessage.firstname.charAt(0)} color={'#f7f6f6'} />
                         :
                         null
                     }       

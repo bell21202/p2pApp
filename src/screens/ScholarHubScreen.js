@@ -11,7 +11,7 @@ var hubType;
 
 const ScholarHubScreen = ({navigation}) => {
     const {state, submitPost, getPosts} = useContext(AuthContext);
-    const {sPosts} = state;
+    const {sPosts, firstname, lastname, isAdmin} = state;
     const [visible, setVisible] = useState(false);
 
     // admin related
@@ -21,8 +21,6 @@ const ScholarHubScreen = ({navigation}) => {
     var inputRef = null;
     var isLoading = false;
     
-    //var color = '#' + colorGen(); // put this in the parent
-
     const renderInput = () => {
         setVisible(!visible);
     }
@@ -49,7 +47,6 @@ const ScholarHubScreen = ({navigation}) => {
     }
 
     useEffect(() => {
-        console.log('in use effect scholar hubscreen');
         BackHandler.addEventListener('hardwareBackPress', backNavigation);
         if (inputRef != null) {
             inputRef.focus();
@@ -63,24 +60,15 @@ const ScholarHubScreen = ({navigation}) => {
     }, [visible]);
 
     const fetchPosts = async () => {
-        console.log('running fetchposts from scholar hubscreen');
         isLoading = true;
-
         try {
-            console.log('before');
             await getPosts({hubType});
         }
         catch(err) {
-            console.log("error in fetch posts"); // change later
+            // todo_log statement
         }
         isLoading = false;
     };
-
-    // get rid of later 
-    var firstLetterInName = 'T'; // from current user!!
-    var firstname = 'Tenaj';
-    var lastname = 'Moody';
-    var isAdmin = true;
 
     // keep for now..
     const separator = () => 
@@ -131,7 +119,7 @@ const ScholarHubScreen = ({navigation}) => {
                 onPress={() => {renderInput()}}
             /> :
             <View style={[styles.postInputView, visible ? {width: '100%'} : {width: '0'}]}> 
-                <PostInput ref={input  => inputRef = input} title={firstLetterInName} placeholder={'Add a post'} />
+                <PostInput ref={input  => inputRef = input} placeholder={'Add a post'} />
                 <TouchableOpacity onPress={() => isUserAdmin()}>
                     <Icon name="paper-plane" type='font-awesome' color={'#2196f3'} containerStyle={{marginLeft: 5}} />
                 </TouchableOpacity>
