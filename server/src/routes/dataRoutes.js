@@ -319,7 +319,7 @@ router.post('/getChatHistory', requireAuth, async (req, res) => {
                 to: userId,
                 from: other
             }]
-        }).sort({createdAt: -1});
+        }).sort({createdAt: 1});
 
         if(!chatHistory) {
             return res.status(422).send({error: 'chat history retrieval error'});

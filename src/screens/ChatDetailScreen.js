@@ -89,6 +89,14 @@ const ChatDetailScreen = () => {
 
         return (
             <>
+                <View style={{alignItems: 'center', marginTop: 10}}>
+                    {showDay ? 
+                        <Text style={{color: 'gray', fontSize: 12}}>
+                            {moment(item.createdAt).format('dddd MMMM Do, YYYY')}
+                        </Text> : null
+                    }
+                </View>
+                
                 <View style={[styles.chatContainer, (side == 'right') ? {flexDirection: 'row-reverse'} : {flexDirection: 'row'}]}>
                     {(userToMessage.image_url && side == 'left') ? 
                         <UserAvatar sourceimage={userToMessage.image_url} />
@@ -104,17 +112,7 @@ const ChatDetailScreen = () => {
                         <Text style={{color: 'white', fontSize: 15}}> {item.text} </Text>
                     </View>
                     <Text style={{color: 'gray', fontSize: 12, marginBottom: 2}}> {timestamp} </Text>
-                </View>
-
-                {/*
-                <View style={{alignItems: 'center', marginTop: 10}}>
-                    {showDay ? 
-                        <Text style={{color: 'gray', fontSize: 12}}>
-                            {moment(item.createdAt).format('dddd MMMM Do, YYYY')}
-                        </Text> : null
-                    }
-                </View> 
-                */}
+                </View>      
             </>
         )
         
@@ -130,7 +128,7 @@ const ChatDetailScreen = () => {
                     refreshing={isLoading}
                     onRefresh={fetchChatHistory}
                     onScrollToIndexFailed={()=>{}}
-                    inverted={true}
+                    //inverted={true}
                 />
              </View>
             <View style={styles.chatInputView}>
