@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, {useContext, useState} from 'react';
 import {StyleSheet, View, TouchableOpacity, FlatList} from 'react-native';
 import {Context as AuthContext} from '../context/AuthContext';
 import PostInput from '../components/PostInput';
@@ -12,23 +12,44 @@ const PostDetailScreen = ({navigation}) => {
     const {submitPost, getPosts, state} = useContext(AuthContext);
     const {cPosts, sPosts, firstname, lastname} = state;
 
-    var navState = navigation.state;
-    parentPost = navState.params.post;
-     
+    parentPost = navigation.state.params.post;
+
     var firstLetterInName = firstname.charAt(0);
     var hubType = parentPost.hubType;
     var parentId = parentPost._id;
 
     var inputRef = null;
     var isLoading = false;
+    var replyCount;
+    var replies;
 
-    // posts of concern related to the parent post
-    var posts = (hubType == 's') ? sPosts : cPosts;
-    var replies = getPostRepliesById(parentPost._id, posts);
+    const fetchPostOfInterest = async () => {
+        try {
+            await getPosts({hubType})
+        }
+        catch(err){
+            // todo_log statement
+        }
+    };
 
-    // preserve the reply count before adding the parent post
-    var replyCount = replies.length;
-    replies.unshift(parentPost);
+    if(hubType == 's') {
+        if(sPosts == null) {
+            fetchPostOfInterest();
+        } else{
+            replies = getPostRepliesById(parentPost._id, sPosts);
+            replyCount = replies.length;
+            replies.unshift(parentPost);
+        }
+    }
+    else if(hubType == 'stm') {
+        if(cPosts == null){
+            fetchPostOfInterest();
+        } else {
+            replies = getPostRepliesById(parentPost._id, cPosts);
+            replyCount = replies.length;
+            replies.unshift(parentPost);
+        }
+    }
 
     const constructPostReply = (post) => {
         return (
@@ -50,8 +71,6 @@ const PostDetailScreen = ({navigation}) => {
         console.log('refreshing replies');
         isLoading = true;
         try{
-            // this is when someone else makes a comment while the user
-            // is on this screen
             await getPosts({hubType});
         }
         catch(err) {

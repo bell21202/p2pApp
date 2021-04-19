@@ -21,7 +21,7 @@ const NotificationScreen = ({navigation}) => {
             await getAdminPosts({});
         }
         catch(err) {
-            console.log("error in fetch posts"); // change later
+            // todo_log statement
         }
         isLoading = false;
     }
