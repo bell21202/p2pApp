@@ -173,7 +173,7 @@ const EditProfileForm = ({nav}) => {
             
             {visible ? <DateTimePicker
                 testID="dateTimePicker"
-                value={!cohortDateIn ? Date.now() : cohortDateIn}
+                value={!cohortDateIn ? Date.now() : moment(cohortDateIn).toDate()}
                 mode='date'
                 onChange={datePicked}
                 display='spinner'/> : null

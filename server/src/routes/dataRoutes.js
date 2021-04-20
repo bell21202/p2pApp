@@ -23,9 +23,8 @@ router.post('/saveAccount', requireAuth, async (req, res) => {
             }
             // get the updated user back
             user = doc;
+            res.send({"user" : user}); // send the user back
         });
-
-        res.send({"user" : user}); // send the user back
     }
     catch (err) {
         return res.status(422).send(err.message); 
