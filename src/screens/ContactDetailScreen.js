@@ -15,7 +15,7 @@ const ContactDetailScreen = ({navigation}) => {
 
     var firstname = user.firstname;
     var lastname = user.lastname;
-    var memberType = mem.toString().replace(","," + ");
+    var memberType = mem.toString().replace(/,/g," + ");
 
     return(
         <View style={{marginTop: 10}}> 

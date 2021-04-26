@@ -83,7 +83,7 @@ const EditProfileForm = ({nav}) => {
     };
 
     // switch up the avatar image
-    if(firstnameIn != null || firstnameIn != '')
+    if(firstnameIn != undefined && firstnameIn != null && firstnameIn != '')
     {
         showTitle = true;
     }

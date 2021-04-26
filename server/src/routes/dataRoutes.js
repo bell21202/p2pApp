@@ -331,6 +331,21 @@ router.post('/getChatHistory', requireAuth, async (req, res) => {
     }
 })
 
+router.post('/setRead', requireAuth, async (req, res) => {
+  const {messages} = req.body;
+  var msgIds = [];
+
+  messages.forEach(element => {
+    msgIds.push(element._id);
+  });
+
+  var filter = {
+    _id: {$in: msgIds}
+  };
+
+  const result = await Message.updateMany(filter, {isRead: true});
+})
+
 // todo_pp: later change to just c or something
 const convertHubType = (hubType) => {
     if (hubType == 's' || hubType == 'stm') {

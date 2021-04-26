@@ -3,16 +3,38 @@ import {Text, View, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
 import {Context as AuthContext} from '../context/AuthContext';
 import UserAvatar from '../components/UserAvatar';
 import moment from 'moment';
+import {Badge} from 'react-native-elements';
 
 const ChatScreen = ({nav}) => {
     const {state, getUserChats} = useContext(AuthContext);
-    const {newMessagePub} = state;
+    const {newMessagePub, userId} = state;
     const [userChats, setUserChats] = useState(null);
+    const [newMsgId, setNewMsgId] = useState(null);
+
     var isLoading = false;
 
     useEffect(() => {
+        var ofConcern = false;
+        if(newMessagePub != null)
+        {
+            // someone sent a message to 'you'
+            if(newMessagePub.to == userId){
+                ofConcern = true;
+            }
+            if(ofConcern && newMessagePub._id != newMsgId)
+            {
+                fetchUserChats();
+                return
+            }
+            // if it's not to 'me' or we already processed it don't refresh
+            if(!ofConcern || newMessagePub._id == newMsgId)
+            {
+                return;
+            }
+        }
+
         fetchUserChats();
-    }, []);
+    }, [newMessagePub]);
 
     const fetchUserChats = async () => {
         try{
@@ -30,6 +52,10 @@ const ChatScreen = ({nav}) => {
                     consolidatedChats.push(element);
                 }
             });
+
+            if(newMessagePub != null && newMessagePub._id != newMsgId){
+                setNewMsgId(newMessagePub._id);
+            }
             setUserChats(consolidatedChats);
         } catch(err) {
             // todo_log statement
@@ -48,6 +74,12 @@ const ChatScreen = ({nav}) => {
         var now = moment(Date.now());
         var createdTime = moment(chatMessage.item.createdAt);
         var startOfDay = moment.duration(moment().startOf('day').fromNow());
+
+        // is read property for messages sent to 'me'
+        var isRead = true;
+        if(chatMessage.item.to == userId){
+            isRead = chatMessage.item.isRead;
+        }
 
         // msg was sent today
         if((now.diff(createdTime, 'hours')) <= startOfDay.hours())
@@ -71,6 +103,7 @@ const ChatScreen = ({nav}) => {
                         <Text style={{fontSize: 12, color: 'gray'}}>
                             {timestamp}
                         </Text>
+                        {!isRead ? <Badge status='primary' badgeStyle={{width: 15, height:15, borderRadius: 10, marginTop: 5}}/> : null }
                     </View>
                 </TouchableOpacity>
             </View>

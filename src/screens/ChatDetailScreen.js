@@ -10,7 +10,7 @@ import UserAvatar from '../components/UserAvatar';
 var userToMessage;
 var fLRef;
 const ChatDetailScreen = () => {
-    const {state, sendChat, getChatHistory} = useContext(AuthContext);
+    const {state, sendChat, getChatHistory, setRead} = useContext(AuthContext);
     const {newMessagePub} = state;
     const {userId} = state;
     const [chats, setChats] = useState(null);
@@ -19,6 +19,23 @@ const ChatDetailScreen = () => {
     var isLoading = false;
     var inputRef = null;
     var dayOfMsg = null;
+
+
+    // the user has now seen all of the latest messages
+    if(chats != null) {
+        var readMsgs = [];
+        chats.forEach(element => {
+            if(!element.isRead && element.to == userId) {
+                element.isRead = true;
+                readMsgs.push(element);
+            }
+        });
+        if(readMsgs.length > 0)
+        {
+            // todo_pp; find a better way to do this.
+            setRead({'messages': readMsgs});
+        }
+    }
 
     useEffect(() => {
         // incoming new messages
@@ -160,7 +177,7 @@ ChatDetailScreen.navigationOptions = ({navigation}) => {
         headerTintColor: 'white',
 
         // slide from right
-        cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS
+        cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
     }
 }
 

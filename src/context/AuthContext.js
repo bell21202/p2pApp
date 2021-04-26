@@ -240,8 +240,19 @@ const getChatHistory = (dispatch) => async (props) => {
     }
 }
 
+const setRead = (dispatch) => async (props) => {
+    messages = props.messages;
+    try{
+        await app_API.post('/setRead', {messages});
+    }
+    catch(err) {
+        console.log(err);
+        dispatch({type: 'setReadError', payload: err});
+    }
+}
+
 export const {Provider, Context} = createDataContext(authReducer,
-    {signin, signout, signup, clearErrorMessage, tryLocalSignin, accountSave, submitPost, getPosts, getAdminPosts, changePassword, getUsers, getUserChats, sendChat, getChatHistory},
+    {signin, signout, signup, clearErrorMessage, tryLocalSignin, accountSave, submitPost, getPosts, getAdminPosts, changePassword, getUsers, getUserChats, sendChat, getChatHistory, setRead},
      {token: null, errorMessage: '', email: '', password: '', firstname: '', lastname: '', memberType: '', isAdmin: false, cohortDate: null, sPosts: [], cPosts: [], adminPosts: [], users: [], userId: '', newMessagePub: null});
 
 
