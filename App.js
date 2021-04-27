@@ -62,13 +62,13 @@ const notificationsFlow = createStackNavigator({
 const switchNavigator = createSwitchNavigator({
   //ResolveAuth: ResolveAuthScreen,
 
-  /*
   initFlow: createStackNavigator({
     Init: InitScreen,
     Signup: SignupScreen,
     Signin: SigninScreen,
-    CreateProfile: CreateProfileScreen
-  }),*/
+    CreateProfile: CreateProfileScreen,
+    ChangePassword: ChangePasswordScreen,
+  }),
   mainFlow: createBottomTabNavigator({
       Home: {
         screen: hubFlow,
