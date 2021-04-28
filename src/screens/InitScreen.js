@@ -7,8 +7,6 @@ import { Button } from 'react-native';
 import InitStyle from '../stylecomponents/InitStyle';
 
 const InitScreen = ({navigation}) => {
-    const {signout} = useContext(AuthContext);
- 
     return (
         <SafeAreaView style={InitStyle.container} forceInset={{top: 'always'}}>
             <Image style={styles.image} source={require('../img/unnamed.png')} />

@@ -60,7 +60,7 @@ const notificationsFlow = createStackNavigator({
 });
 
 const switchNavigator = createSwitchNavigator({
-  //ResolveAuth: ResolveAuthScreen,
+  ResolveAuth: ResolveAuthScreen,
 
   initFlow: createStackNavigator({
     Init: InitScreen,

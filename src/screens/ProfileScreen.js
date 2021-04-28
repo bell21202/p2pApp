@@ -9,7 +9,7 @@ import moment from 'moment';
 import UserAvatar from '../components/UserAvatar';
 
 const ProfileScreen = ({navigation}) => {
-    const {state} = useContext(AuthContext);
+    const {state, signout} = useContext(AuthContext);
     const {firstname, lastname, email, cohortDate, memberType} = state;
     const [visible, setVisible] = useState(false);
 
@@ -27,7 +27,7 @@ const ProfileScreen = ({navigation}) => {
     }
 
     return (
-    <View>
+    <View style={{height: '100%'}}>
         <View style={styles.headerView}>
             <Spacer>
 
@@ -54,8 +54,8 @@ const ProfileScreen = ({navigation}) => {
                 gradyear={cohortDate ? moment(cohortDate).calendar() : null}
             />
         </View>
-        <View style={{alignItems: 'center', marginTop: '40%'}}>
-            <TouchableOpacity onPress={() => setVisible(!visible)}>
+        <View style={{position: 'absolute', bottom: 20, width: '100%'}}>
+            <TouchableOpacity style={{alignSelf: 'center'}} onPress={() => setVisible(!visible)}>
                 <Text style={{color: '#aaaaaa', fontSize: 16}}>Sign Out</Text>
             </TouchableOpacity>
         </View>

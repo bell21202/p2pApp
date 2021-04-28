@@ -9,12 +9,12 @@ const authReducer = (state, action) => {
             return {...state, errorMessage: action.payload};
         case 'signin':
             var user = action.payload.user;
-            var token = action.payload.token; // todo: research if better to pass in a user and not this long string of state variables
-            return {errorMessage: '', email: user.email, firstname: user.firstname, lastname: user.lastname, memberType: user.memberType, cohortDate: user.cohortDate, isAdmin: user.isAdmin, token: token, userId: user._id};
+            // todo: research if better to pass in a user and not this long string of state variables
+            return {errorMessage: '', email: user.email, firstname: user.firstname, lastname: user.lastname, memberType: user.memberType, cohortDate: user.cohortDate, isAdmin: user.isAdmin, userId: user._id};
         case 'clear_error_message':
             return{...state, errorMessage: ''};
         case 'signout':
-            return {token: null, error: ''};
+            return {error: '', state: null};
         //case 'accountSave': // update picture maybe??
             //return {...state, errorMessage: ''};
         case 'accountSaveError':
@@ -50,19 +50,20 @@ const authReducer = (state, action) => {
 };
 
 /**** Authentication Scheme **********/
-// update token state here, fix this with the signout function too
 const tryLocalSignin = dispatch => async () => {
     try{
-        token = await AsyncStorage.getItem('token') // should this string be unique?
+        token = await AsyncStorage.getItem('token') // todo_pp: should this string be unique?
         if(token) {
-            // todo: make a request to server to get current user!!
-            dispatch({type: 'signin', payload: token});
+            const response = await app_API.post('/autoLogin');
+            dispatch({type: 'signin', payload: response.data});
+            navigate('mainFlow');
+            return;
         }
     }
     catch(err){
+        // todo_log: statement
     }
-    // token = token?
-    navigate('mainFlow');
+    navigate('initFlow');
 };
 
 const clearErrorMessage = dispatch => () => {
@@ -105,8 +106,8 @@ const signin = dispatch => async ({email, password}) => {
 const signout = (dispatch) => async () => {
     try {
         await AsyncStorage.removeItem('token');
-        dispatch({type: 'signout'}); // wipe out the state
         navigate('initFlow');
+        dispatch({type: 'signout'}); // wipe out the state
     }
     catch(err){
         // todo_log statement
@@ -253,6 +254,6 @@ const setRead = (dispatch) => async (props) => {
 
 export const {Provider, Context} = createDataContext(authReducer,
     {signin, signout, signup, clearErrorMessage, tryLocalSignin, accountSave, submitPost, getPosts, getAdminPosts, changePassword, getUsers, getUserChats, sendChat, getChatHistory, setRead},
-     {token: null, errorMessage: '', email: '', password: '', firstname: '', lastname: '', memberType: '', isAdmin: false, cohortDate: null, sPosts: [], cPosts: [], adminPosts: [], users: [], userId: '', newMessagePub: null});
+     {errorMessage: '', email: '', password: '', firstname: '', lastname: '', memberType: '', isAdmin: false, cohortDate: null, sPosts: [], cPosts: [], adminPosts: [], users: [], userId: '', newMessagePub: null});
 
 

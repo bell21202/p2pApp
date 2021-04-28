@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const User = mongoose.model('User');
+const requireAuth = require('../middlewares/requireAuth');
 
 const router = express.Router();
 
@@ -46,6 +47,16 @@ router.post('/signin', async (req,res) => {
     } catch(err) {
         console.log('password check did not pass');
         return res.status(422).send({error: 'Invalid password or email'});
+    }
+});
+
+router.post('/autoLogin', requireAuth, async (req,res) => {
+    var user = req.user;
+    try{
+        res.send({"user" : user});
+    } catch(err) {
+        console.log('autologin failed');
+        return res.status(422).send({error: 'Failed to autologin'});
     }
 });
 
