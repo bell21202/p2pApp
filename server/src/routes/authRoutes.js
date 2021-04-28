@@ -36,7 +36,6 @@ router.post('/signin', async (req,res) => {
     // ..take a little time
     const user = await User.findOne({email});
     if(!user) {
-        console.log("in here");
         return res.status(422).send({error: 'Invalid password or email'});
     }
 
@@ -45,7 +44,8 @@ router.post('/signin', async (req,res) => {
         const token = jwt.sign({userId: user._id},'MY_SECRET_KEY'); // place somewhere in s3 bucket or something
         res.send({"token" : token, "user" : user});
     } catch(err) {
-        console.log('password check did not pass');
+        // todo_log: add statement
+        // console.log('password check did not pass');
         return res.status(422).send({error: 'Invalid password or email'});
     }
 });
@@ -55,7 +55,8 @@ router.post('/autoLogin', requireAuth, async (req,res) => {
     try{
         res.send({"user" : user});
     } catch(err) {
-        console.log('autologin failed');
+        // todo_log: add statement
+        // console.log('autologin failed');
         return res.status(422).send({error: 'Failed to autologin'});
     }
 });

@@ -68,7 +68,6 @@ const PostDetailScreen = ({navigation}) => {
     }
 
     const refreshReplies = async () => {
-        console.log('refreshing replies');
         isLoading = true;
         try{
             await getPosts({hubType});

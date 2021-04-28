@@ -52,7 +52,8 @@ router.post('/submitPost', requireAuth, async (req, res) => {
         res.send({"posts" : posts});
     }
     catch (err) {
-        console.log("error during post submittal");
+        // todo_log: add statement
+        // console.log("error during post submittal");
         return res.status(422).send(err.message);
     }
 });
@@ -73,7 +74,8 @@ router.post('/getPosts', requireAuth, async (req, res) => {
         res.send({'posts': posts});
     }
     catch (err) {
-        console.log('error during post retreival');
+        // todo_log: add statement
+        // console.log('error during post retreival');
         return res.status(422).send(err.message);
     }
 });
@@ -88,7 +90,8 @@ router.post('/getAdminPosts', requireAuth, async (req, res) => {
         res.send({'posts': posts});
     }
     catch (err) {
-        console.log('error during post retreival');
+        // todo_log: add statement
+        // console.log('error during post retreival');
         return res.status(422).send(err.message);
     }
 })
@@ -124,7 +127,8 @@ router.post('/getUsers', requireAuth, async (req, res) => {
         res.send({'users': users});
     }
     catch (err) {
-        console.log('error during users retreival');
+        // todo_log: add statement
+        // console.log('error during users retreival');
         return res.status(422).send(err.message);
     }
 })
@@ -142,7 +146,8 @@ router.post('/sendChat', requireAuth, async (req, res) => {
         res.send({"newMessage" : message});
     }
     catch (err) {
-        console.log("error during sending chat");
+        // todo_log: add statement
+        // console.log("error during sending chat");
         return res.status(422).send(err.message);
     }
 })
@@ -298,7 +303,8 @@ router.post('/getUserChats', requireAuth, async (req, res) => {
         res.send({'chats': allChats});
     }
     catch(err) {
-        console.log('error during chats retreival');
+        // todo_log: add statement
+        // console.log('error during chats retreival');
         return res.status(422).send(err.message);
     }
 })
@@ -326,7 +332,8 @@ router.post('/getChatHistory', requireAuth, async (req, res) => {
         res.send({'chatHistory': chatHistory});
     }
     catch(err) {
-        console.log('error during getting chat history');
+        // todo_log: add statement
+        // console.log('error during getting chat history');
         return res.status(422).send(err.message);
     }
 })

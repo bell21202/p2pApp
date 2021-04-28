@@ -23,10 +23,12 @@ mongoose.connect(mongoUri, {
 });
 
 mongoose.connection.on('connected', () => {
+    // todo_log: add statement
     console.log('Connected to mongo instance');
 });
 
 mongoose.connection.on('error', (err) => {
+    // todo_log: add statement
     console.error('Error connecting to mongo', err);
 });
 
@@ -36,5 +38,6 @@ app.get('/', requireAuth, (req,res) => {
 });
 
 app.listen(3000, () => {
+    // todo_log: add statement
     console.log('Listening on port 3000');
 });

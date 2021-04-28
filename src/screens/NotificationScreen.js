@@ -10,12 +10,10 @@ const NotificationScreen = ({navigation}) => {
     var isLoading = false;
 
     useEffect(() => {
-        console.log('in use effect notification screen');
         fetchAdminPosts();
     }, []);
 
     const fetchAdminPosts = async () => {
-        console.log('running fetchADMINposts from notification screen');
         isLoading = true;
         try{
             await getAdminPosts({});

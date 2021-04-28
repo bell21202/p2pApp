@@ -76,13 +76,15 @@ const signup = dispatch => async ({email, password}) => {
         try{
             await AsyncStorage.setItem('token', response.data.token); 
         }
-        catch(err){console.log("error setting token")};
+        catch(err){
+            // todo_log: statement
+        };
         dispatch({type: 'signin', payload: response.data});
         navigate('CreateProfile');
     }
     catch(err)
     {
-        console.log(err)
+        // todo_log: statement
         dispatch({type: 'add_error', payload: 'Invalid password or email'})
     }
 };
@@ -93,12 +95,14 @@ const signin = dispatch => async ({email, password}) => {
         try{
             await AsyncStorage.setItem('token', response.data.token);
         }
-        catch(err){console.log("error setting token")}
+        catch(err){
+            // todo_log: statement
+        }
         dispatch({type: 'signin', payload: response.data});
         navigate('mainFlow');
     }
     catch(err) {
-        console.log(err)
+        // todo_log: statement
         dispatch({type: 'add_error', payload: 'Invalid password or email'});
     }
 };
@@ -126,7 +130,7 @@ const accountSave = (dispatch) => async (props) => {
         navigate('mainFlow');
     }
     catch(err) {
-        console.log(err);
+        // todo_log: statement
         dispatch({type: 'accountSaveError', payload: err});  // change this later??
     }
 }
@@ -163,7 +167,7 @@ const submitPost = (dispatch) => async  (props) => {
         dispatch({type: 'submitPost', payload: response.data});
     }
     catch(err) {
-        console.log(err);
+        // todo_log: statement
         dispatch({type: 'submitPostError', payload: err});
     }
 }
@@ -175,7 +179,7 @@ const getPosts = (dispatch) => async (props) => {
         dispatch({type: 'getPosts', payload: response.data})
     }
     catch(err) {
-        console.log(err);
+        // todo_log: statement
         dispatch({type: 'getPostsError', payload: err});
     }  
 }
@@ -186,7 +190,7 @@ const getAdminPosts = (dispatch) => async () => {
         dispatch({type: 'getAdminPosts', payload: response.data})
     }
     catch(err) {
-        console.log(err);
+        // todo_log: statement
         dispatch({type: 'getPostsError', payload: err});
     }
 }
@@ -197,7 +201,7 @@ const getUsers = (dispatch) => async () => {
         dispatch({type: 'getUsers', payload: response.data})
     }
     catch(err) {
-        console.log(err);
+        // todo_log: statement
         dispatch({type: 'getUsersError', payload: err});
     }
 }
@@ -208,8 +212,8 @@ const getUserChats = (dispatch) => async (props) => {
         return response.data.chats;  // return directly
     }
     catch(err) {
-        console.log(err);
-        dispatch({type: 'getChatsError', payload: err})
+        // todo_log: statement
+        // dispatch({type: 'getChatsError', payload: err})
     }
 }
 
@@ -224,8 +228,8 @@ const sendChat = (dispatch) => async (props) => {
         dispatch({type: 'sendChat', payload: response.data});
     }
     catch(err) {
-        console.log(err);
-        dispatch({type: 'sendChatError', payload: err})
+        // todo_log: statement
+        // dispatch({type: 'sendChatError', payload: err})
     }
 }
 
@@ -236,8 +240,8 @@ const getChatHistory = (dispatch) => async (props) => {
         return response.data.chatHistory;  // return directly
     }
     catch(err) {
-        console.log(err);
-        dispatch({type: 'getChatHistoryError', payload: err});
+        // todo_log: statement
+        // dispatch({type: 'getChatHistoryError', payload: err});
     }
 }
 
@@ -247,8 +251,8 @@ const setRead = (dispatch) => async (props) => {
         await app_API.post('/setRead', {messages});
     }
     catch(err) {
-        console.log(err);
-        dispatch({type: 'setReadError', payload: err});
+        // todo_log: statement
+        // dispatch({type: 'setReadError', payload: err});
     }
 }
 
