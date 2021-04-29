@@ -10,21 +10,30 @@ const router = express.Router();
 
 //todo_pp: be sure to use .get instead of post for some of these, and in authcontext
 
-router.post('/saveAccount', requireAuth, async (req, res) => {
-    const {email, firstname, lastname, memberType, cohortDate} = req.body;
-    var user = req.user;
-    userId = user._id;
+router.post('/saveAccount', async (req, res) => {
+    const {email, password, firstname, lastname, memberType, cohortDate, userId} = req.body;
     try
     {
-         // update our user info
-        await User.findOneAndUpdate({_id: userId}, {email, firstname, lastname, memberType, cohortDate}, {returnOriginal: false}, (err,doc) => {
-            if (err) {
-                throw err;
-            }
-            // get the updated user back
-            user = doc;
-            res.send({"user" : user}); // send the user back
-        });
+      var user;
+        // User is editing account
+        if(userId != null && userId != '')
+        {
+            // update our user info
+            await User.findOneAndUpdate({_id: userId}, {email, firstname, lastname, memberType, cohortDate}, {returnOriginal: false}, (err,doc) => {
+                if (err) {
+                    throw err;
+                }
+                // get the updated user back
+                user = doc;
+            });
+        }
+        // This is their first account save
+        else {
+            user = new User({email, password, firstname, lastname, memberType, cohortDate});
+            await user.save();
+        }
+      const token = jwt.sign({userId: user._id},'MY_SECRET_KEY'); // place somewhere in s3 bucket or something
+      res.send({"token" : token, "user" : user});
     }
     catch (err) {
         return res.status(422).send(err.message); 

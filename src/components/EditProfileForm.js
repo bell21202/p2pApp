@@ -15,7 +15,7 @@ import UserAvatar from '../components/UserAvatar';
 
 const EditProfileForm = ({nav}) => {
     const {state, accountSave, clearErrorMessage} = useContext(AuthContext);
-    const {email, firstname, lastname, memberType, cohortDate, errorMessage} = state;
+    const {email, password, firstname, lastname, memberType, cohortDate, errorMessage, userId} = state;
 
     // use the defaults we have
     const [emailIn, setEmail] = useState(email);
@@ -72,7 +72,8 @@ const EditProfileForm = ({nav}) => {
         }*/
         else{
             setInternalErr(null);
-            accountSave({emailIn, firstnameIn, lastnameIn, memberTypeIn, cohortDateIn})
+            // just pass the password and userId through!
+            accountSave({emailIn, password, firstnameIn, lastnameIn, memberTypeIn, cohortDateIn, userId})
 
             // show confirmation, only aftr initial login
             if(nav.state.routeName == 'EditProfile')

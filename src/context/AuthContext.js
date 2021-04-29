@@ -7,6 +7,8 @@ const authReducer = (state, action) => {
     switch(action.type) {
         case 'add_error':
             return {...state, errorMessage: action.payload};
+        case 'signup':
+            return {...state, email: action.payload.email, password: action.payload.password};
         case 'signin':
             var user = action.payload.user;
             // todo: research if better to pass in a user and not this long string of state variables
@@ -72,14 +74,7 @@ const clearErrorMessage = dispatch => () => {
 
 const signup = dispatch => async ({email, password}) => {
     try{
-        const response = await app_API.post('/signup', {email,password});
-        try{
-            await AsyncStorage.setItem('token', response.data.token); 
-        }
-        catch(err){
-            // todo_log: statement
-        };
-        dispatch({type: 'signin', payload: response.data});
+        dispatch({type: 'signup', payload: {email, password}});
         navigate('CreateProfile');
     }
     catch(err)
@@ -120,18 +115,28 @@ const signout = (dispatch) => async () => {
 
 const accountSave = (dispatch) => async (props) => {
     email = props.emailIn;
+    password = props.password;
     firstname = props.firstnameIn;
     lastname = props.lastnameIn;
     memberType = props.memberTypeIn;
     cohortDate = props.cohortDateIn;
+    userId = props.userId;
+
     try {
-        const response = await app_API.post('/saveAccount', {email, firstname, lastname, memberType, cohortDate});
+        const response = await app_API.post('/saveAccount', {email, password, firstname, lastname, memberType, cohortDate, userId});
+        var token = await AsyncStorage.getItem('token');
+
+        // check for token
+        if(!token) {
+            await AsyncStorage.setItem('token', response.data.token);
+        }
+
         dispatch({type: 'signin', payload: response.data});
         navigate('mainFlow');
     }
     catch(err) {
-        // todo_log: statement
-        dispatch({type: 'accountSaveError', payload: err});  // change this later??
+        // todo_log: This occasionally fails for some reason.
+        //dispatch({type: 'accountSaveError', payload: err});  // change this later??
     }
 }
 
