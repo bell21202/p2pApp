@@ -14,7 +14,7 @@ router.post('/saveAccount', async (req, res) => {
     const {email, password, firstname, lastname, memberType, cohortDate, userId} = req.body;
     try
     {
-      var user;
+        var user;
         // User is editing account
         if(userId != null && userId != '')
         {
@@ -32,8 +32,8 @@ router.post('/saveAccount', async (req, res) => {
             user = new User({email, password, firstname, lastname, memberType, cohortDate});
             await user.save();
         }
-      const token = jwt.sign({userId: user._id},'MY_SECRET_KEY'); // place somewhere in s3 bucket or something
-      res.send({"token" : token, "user" : user});
+        const token = jwt.sign({userId: user._id},'MY_SECRET_KEY'); // place somewhere in s3 bucket or something
+        res.send({"token" : token, "user" : user});
     }
     catch (err) {
         return res.status(422).send(err.message); 
