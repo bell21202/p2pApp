@@ -28,6 +28,8 @@ import {setNavigator} from './src/navigationRef';
 import ResolveAuthScreen from './src/screens/ResolveAuthScreen';
 import InitScreen from './src/screens/InitScreen';
 
+import {LogBox} from 'react-native';
+
 // nav --
 const profileFlow = createStackNavigator({
   Profile: ProfileScreen,
@@ -112,8 +114,12 @@ const switchNavigator = createSwitchNavigator({
 
 const App = createAppContainer(switchNavigator);
 
+
+
 // make the navigator available to the rest of the app 
 export default () => {
+  LogBox.ignoreLogs(["The global \"__expo\" and \"Expo\" objects"])
+
   return (
     <AuthProvider>
         <App ref={(navigator) => {setNavigator(navigator)}} />
