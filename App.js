@@ -9,7 +9,6 @@ import SignupScreen from './src/screens/SignupScreen';
 import ChatScreen from './src/screens/ChatScreen';
 import ContactsScreen from './src/screens/ContactsScreen';
 import EditProfileScreen from './src/screens/EditProfileScreen';
-import GroupScreen from './src/screens/GroupScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import ScholarHubScreen from './src/screens/ScholarHubScreen';
 import CommunityHubScreen from './src/screens/CommunityHubScreen';
@@ -27,6 +26,7 @@ import {Provider as AuthProvider} from './src/context/AuthContext';
 import {setNavigator} from './src/navigationRef';
 import ResolveAuthScreen from './src/screens/ResolveAuthScreen';
 import InitScreen from './src/screens/InitScreen';
+import PushNotificationHandler from './src/notifications/handler';
 
 import {LogBox} from 'react-native';
 
@@ -114,15 +114,13 @@ const switchNavigator = createSwitchNavigator({
 
 const App = createAppContainer(switchNavigator);
 
-
-
 // make the navigator available to the rest of the app 
 export default () => {
-  LogBox.ignoreLogs(["The global \"__expo\" and \"Expo\" objects"])
-
+  LogBox.ignoreLogs(["The global \"__expo\" and \"Expo\" objects"]);
+  PushNotificationHandler();
   return (
     <AuthProvider>
-        <App ref={(navigator) => {setNavigator(navigator)}} />
+      <App ref={(navigator) => {setNavigator(navigator)}} />
     </AuthProvider>
   );
 };

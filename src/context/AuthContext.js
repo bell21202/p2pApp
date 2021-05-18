@@ -51,6 +51,15 @@ const authReducer = (state, action) => {
     }
 };
 
+/**** Push Notifications ***********/
+const savePushToken = dispatch => async ({token}) => {
+    try{
+        await app_API.post('/savePushToken', {token});
+    } catch (err) {
+        // todo_log: statement
+    }
+};
+
 /**** Authentication Scheme **********/
 const tryLocalSignin = dispatch => async () => {
     try{
@@ -262,7 +271,7 @@ const setRead = (dispatch) => async (props) => {
 }
 
 export const {Provider, Context} = createDataContext(authReducer,
-    {signin, signout, signup, clearErrorMessage, tryLocalSignin, accountSave, submitPost, getPosts, getAdminPosts, changePassword, getUsers, getUserChats, sendChat, getChatHistory, setRead},
+    {signin, signout, signup, clearErrorMessage, savePushToken, tryLocalSignin, accountSave, submitPost, getPosts, getAdminPosts, changePassword, getUsers, getUserChats, sendChat, getChatHistory, setRead},
      {errorMessage: '', email: '', password: '', firstname: '', lastname: '', memberType: '', isAdmin: false, cohortDate: null, sPosts: [], cPosts: [], adminPosts: [], users: [], userId: '', newMessagePub: null});
 
 

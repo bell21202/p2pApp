@@ -5,6 +5,8 @@ const requireAuth = require('../middlewares/requireAuth');
 const User = mongoose.model('User');
 const Post = mongoose.model('Post');
 const Message = mongoose.model('Message');
+const Notification = mongoose.model('Notification');
+const pushService = require('../notifications/pushService');
 
 const router = express.Router();
 
@@ -33,6 +35,7 @@ router.post('/saveAccount', async (req, res) => {
             await user.save();
         }
         const token = jwt.sign({userId: user._id},'MY_SECRET_KEY'); // place somewhere in s3 bucket or something
+        
         res.send({"token" : token, "user" : user});
     }
     catch (err) {
@@ -59,6 +62,8 @@ router.post('/submitPost', requireAuth, async (req, res) => {
             return res.status(422).send({error: 'Posts retrieval error'});
         }  
         res.send({"posts" : posts});
+
+        sendPushNotifications(post);
     }
     catch (err) {
         // todo_log: add statement
@@ -153,12 +158,19 @@ router.post('/sendChat', requireAuth, async (req, res) => {
 
         //res.status(200).send('completed');
         res.send({"newMessage" : message});
+
+        // only send a notification 'if' its directed to you
+        if(userId == messageTo){
+          sendPushNotifications(message);
+        }
     }
     catch (err) {
         // todo_log: add statement
         // console.log("error during sending chat");
         return res.status(422).send(err.message);
     }
+
+
 })
 
 router.post('/getUserChats', requireAuth, async (req, res) => {
@@ -362,18 +374,89 @@ router.post('/setRead', requireAuth, async (req, res) => {
   const result = await Message.updateMany(filter, {isRead: true});
 })
 
+router.post('/savePushToken', requireAuth, async (req, res) => {
+  const {token} = req.body;
+
+  var user = req.user;
+  var userId = user._id;
+
+  key = {'userId' : userId};
+  value = {'pushNotificationToken': token};
+  try{
+    await Notification.updateOne(key, value, {upsert:true});
+    res.status(200).send('completed');
+  }
+  catch(err) {
+    return res.status(422).send(err.message);
+  }
+})
+
 // todo_pp: later change to just c or something
 const convertHubType = (hubType) => {
-    if (hubType == 's' || hubType == 'stm') {
-        return hubType;
-    }
-    else if(hubType == 'Scholars Hub'){
-        hubType = 's';
-    } else{
-        hubType = 'stm';
-    }
-    return hubType;
+  if (hubType == 's' || hubType == 'stm') {
+      return hubType;
+  }
+  else if(hubType == 'Scholars Hub'){
+      hubType = 's';
+  } else{
+      hubType = 'stm';
+  }
+  return hubType;
 };
 
+const sendPushNotifications = async (obj) => {
+  try{
+    var notificationObjs;
+    var title = 'Prison-to-Professional Network';
+    var body;
+    var data;
+    var messages = [];
+
+    // push notification for submitting post
+    if (obj instanceof Post) {
+      data = obj;
+      notificationObjs = await Notification.find();  // remove later
+      if(obj.isAdmin){
+        body = 'P2P sent out a new notification!'
+        //notificationObjs = await Notification.find();
+      }
+      // scholar
+      else if(obj.hubType == 's') {
+        body = obj.firstname + ' ' + obj.lastname + ' posted in Scholars Hub';
+        // specify query
+      }
+      // community
+      else {
+        body = obj.firstname + ' ' + obj.lastname + ' posted in Community Hub';
+        // specify query
+      }
+    }
+    // push notification for direct messaging
+    else if (obj instanceof Message) {
+      notificationObjs = await Notification.find(); // remove later
+      messenger = await User.findById(obj.from);
+      data = messenger;
+      body = messenger.firstname + ' ' + messenger.lastname + ' sent you a new message!';
+    }
+
+    // create a message object for every record
+    notificationObjs.forEach(element => {
+      var token = element.pushNotificationToken;
+      messages.push({
+        to: token,
+        body: body,
+        data: data,
+        title: title,
+      })
+    });
+
+    pushService(messages);
+  }
+
+
+  catch(err) {
+    // todo_log add statement
+  }
+}
 
 module.exports = router;
