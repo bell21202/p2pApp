@@ -415,25 +415,24 @@ const sendPushNotifications = async (obj) => {
     // push notification for submitting post
     if (obj instanceof Post) {
       data = obj;
-      notificationObjs = await Notification.find();  // remove later
       if(obj.isAdmin){
         body = 'P2P sent out a new notification!'
-        //notificationObjs = await Notification.find();
+        notificationObjs = await Notification.find({'settings.mainNotify': true});
       }
       // scholar
       else if(obj.hubType == 's') {
         body = obj.firstname + ' ' + obj.lastname + ' posted in Scholars Hub';
-        // specify query
+        notificationObjs = await Notification.find({'settings.scholarNotify': true});
       }
       // community
       else {
         body = obj.firstname + ' ' + obj.lastname + ' posted in Community Hub';
-        // specify query
+        notificationObjs = await Notification.find({'settings.communityNotify': true});
       }
     }
     // push notification for direct messaging
     else if (obj instanceof Message) {
-      notificationObjs = await Notification.find(); // remove later
+      notificationObjs = await Notification.find({'settings.chatNotify': true});
       messenger = await User.findById(obj.from);
       data = messenger;
       body = messenger.firstname + ' ' + messenger.lastname + ' sent you a new message!';
