@@ -8,6 +8,9 @@ const notificationSchema = new mongoose.Schema({
     pushNotificationToken: {
         type: String,
         required: true
+    },
+    settings: {
+        type: Object,
     }
 });
 

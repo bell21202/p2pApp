@@ -42,7 +42,7 @@ const HomeSreen = ({navigation}) => {
                                     <Image style={[styles.icon, {width: 45}]} source={require('../img/stm_icon.png')} />
                                     <Text style={styles.categoryText}> Community </Text>
                                 </Category>
-                                <Category routeName={'!!'}>
+                                <Category routeName={'Settings'}>
                                     <Image style={styles.icon} source={require('../img/settings_icon.png')} />
                                     <Text style={styles.categoryText}> Settings </Text>
                                 </Category>

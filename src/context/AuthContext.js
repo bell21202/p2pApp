@@ -60,6 +60,25 @@ const savePushToken = dispatch => async ({token}) => {
     }
 };
 
+const getUserSettings = dispatch => async () => {
+    try{
+        const response = await app_API.post('/getUserNotificationSettings');
+        return response.data.userNotificationSettings; // return directly
+    } catch(err) {
+        // todo_log: statement
+        // dispatch getUserSettings error
+    }
+}
+
+const saveUserSettings = dispatch => async ({settings}) => {
+    try{
+        const response = await app_API.post('/saveUserSettings', {settings});
+    } catch(err) {
+        // todo_log: statement
+        // dispatch setUserSettings error
+    }
+}
+
 /**** Authentication Scheme **********/
 const tryLocalSignin = dispatch => async () => {
     try{
@@ -271,7 +290,7 @@ const setRead = (dispatch) => async (props) => {
 }
 
 export const {Provider, Context} = createDataContext(authReducer,
-    {signin, signout, signup, clearErrorMessage, savePushToken, tryLocalSignin, accountSave, submitPost, getPosts, getAdminPosts, changePassword, getUsers, getUserChats, sendChat, getChatHistory, setRead},
+    {signin, signout, signup, clearErrorMessage, savePushToken, tryLocalSignin, accountSave, submitPost, getPosts, getAdminPosts, changePassword, getUsers, getUserChats, sendChat, getChatHistory, setRead, getUserSettings, saveUserSettings},
      {errorMessage: '', email: '', password: '', firstname: '', lastname: '', memberType: '', isAdmin: false, cohortDate: null, sPosts: [], cPosts: [], adminPosts: [], users: [], userId: '', newMessagePub: null});
 
 

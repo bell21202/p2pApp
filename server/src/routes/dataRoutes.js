@@ -381,7 +381,7 @@ router.post('/savePushToken', requireAuth, async (req, res) => {
   var userId = user._id;
 
   key = {'userId' : userId};
-  value = {'pushNotificationToken': token};
+  value = {'pushNotificationToken': token, 'settings' : {'mainNotify' : true}};
   try{
     await Notification.updateOne(key, value, {upsert:true});
     res.status(200).send('completed');
@@ -452,11 +452,40 @@ const sendPushNotifications = async (obj) => {
 
     pushService(messages);
   }
-
-
   catch(err) {
     // todo_log add statement
   }
 }
+
+router.post('/getUserNotificationSettings', requireAuth, async (req, res) => {
+  const user = req.user;
+  userId = user._id;
+  try{
+    const userNotification = await Notification.find({'userId' : userId});
+    res.send({"userNotificationSettings" : userNotification});
+  } catch(err) {
+    // todo_log: add statement
+    return res.status(422).send(err.message);
+  }
+});
+
+router.post('/saveUserSettings', requireAuth, async (req, res) => {
+  const user = req.user;
+  var userId = user._id;
+  const {settings} = req.body;
+  try{
+    // the user does NOT want to receive notifications
+    if(settings.mainNotify == false){
+      // delete the notification from the db
+      await Notification.findOneAndDelete({userId: userId});
+    } else {
+      await Notification.findOneAndUpdate({userId: userId}, {settings: settings}, {upsert:true});
+    }
+    res.status(200).send('completed');
+  } catch(err) {
+    // todo_log: add statement
+    return res.status(422).send(err.message);
+  }
+});
 
 module.exports = router;
