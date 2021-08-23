@@ -1,5 +1,7 @@
 require('./models/User');
 require('./models/Post');
+require('./models/Message');
+require('./models/Notification');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -22,10 +24,12 @@ mongoose.connect(mongoUri, {
 });
 
 mongoose.connection.on('connected', () => {
+    // todo_log: add statement
     console.log('Connected to mongo instance');
 });
 
 mongoose.connection.on('error', (err) => {
+    // todo_log: add statement
     console.error('Error connecting to mongo', err);
 });
 
@@ -35,5 +39,6 @@ app.get('/', requireAuth, (req,res) => {
 });
 
 app.listen(3000, () => {
+    // todo_log: add statement
     console.log('Listening on port 3000');
 });

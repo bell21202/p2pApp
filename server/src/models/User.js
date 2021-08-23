@@ -22,6 +22,9 @@ const userSchema = new mongoose.Schema({
     },
     cohortDate: {
         type: Date
+    },
+    isAdmin: {
+        type: Boolean
     }
 });
 
@@ -49,7 +52,7 @@ userSchema.pre('save', function(next) {
 });
 
 // pre-update hook
-userSchema.pre('updateOne',  function(next) {
+userSchema.pre('findOneAndUpdate',  function(next) {
     const userJson = this._update;
 
     // sanity check, validated on client side

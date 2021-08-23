@@ -1,17 +1,13 @@
-import React, {useContext} from 'react';
-import {Text, View, StyleSheet, Image} from 'react-native';
+import React, {useContext, useState} from 'react';
+import {Text, View, StyleSheet, Image, TouchableOpacity} from 'react-native';
 import Spacer from '../components/Spacer';
 import Category from '../components/Category';
 import {Context as AuthContext} from '../context/AuthContext';
+import {Icon} from 'react-native-elements';
 
 const HomeSreen = ({navigation}) => {
-    const {signout, state} = useContext(AuthContext);
+    const {state} = useContext(AuthContext);
     const {firstname} = state;
-
-    /* they've signed out
-    if(!token){
-        navigation.navigate('Signin')
-    }*/
 
     return (
             <View>
@@ -19,7 +15,7 @@ const HomeSreen = ({navigation}) => {
                 <View style={styles.sideView}>
                     <View style={styles.innerView}>
                         <View style={styles.headerView}>
-                            <Spacer> 
+                            <Spacer>
                                 <Text style={{fontSize: 24, color: '#2c2423'}}> Hi {firstname}! </Text>
                                 <Spacer />
                                 <Text style={{fontSize: 24, color: '#2c2423'}}> Welcome to </Text>
@@ -31,22 +27,22 @@ const HomeSreen = ({navigation}) => {
                         <Spacer> 
                             <View style={styles.categories}>
                                 <Category routeName={'Scholars Hub'}>
-                                    <Image style={styles.icon} source={require('../img/scholar_icon.png')} />
+                                    <Image style={[styles.icon, {width: 40}]} source={require('../img/scholar_icon.png')} />
                                     <Text style={styles.categoryText}> Scholar </Text>
                                 </Category>
                                 <Category routeName={'Profile'}>
                                     <Image style={styles.icon} source={require('../img/profile_icon.png')} />
                                     <Text style={styles.categoryText}> Profile </Text>
                                 </Category>
-                                <Category routeName={'Convo'}>
-                                    <Image style={styles.icon} source={require('../img/chat_icon.png')} />
+                                <Category routeName={'Message'}>
+                                    <Image style={styles.icon} source={require('../img/chat_bubble_icon.png')} />
                                     <Text style={styles.categoryText}> Chat </Text>
                                 </Category>
                                 <Category routeName={'Community Hub'}>
-                                    <Image style={styles.icon} source={require('../img/stm_icon.png')} />
+                                    <Image style={[styles.icon, {width: 45}]} source={require('../img/stm_icon.png')} />
                                     <Text style={styles.categoryText}> Community </Text>
                                 </Category>
-                                <Category routeName={'!!'}>
+                                <Category routeName={'Settings'}>
                                     <Image style={styles.icon} source={require('../img/settings_icon.png')} />
                                     <Text style={styles.categoryText}> Settings </Text>
                                 </Category>
@@ -59,11 +55,6 @@ const HomeSreen = ({navigation}) => {
                     </View>
                 </View>
             </View>
-         /*
-            <Spacer>
-                <Button title="Sign Out" onPress={signout} />
-            </Spacer>
-        */
     );  
 };
 
@@ -75,7 +66,7 @@ HomeSreen.navigationOptions = () => {
 
 const styles = StyleSheet.create({
     headerView: {
-        marginTop: 35,
+        marginTop: 20,
         marginRight: 20,
         marginLeft: 25
     },
@@ -97,18 +88,17 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
-        height: 200
     },
     categoryText: {
         textAlign: 'center',
         marginTop:10,
-        fontSize: 14,
+        fontSize: 15,
         color: '#2c2423',
     },
     icon: {
         alignSelf: 'center',
-        width:45,
-        height:45
+        width:35,
+        height:35
     }
 });
 

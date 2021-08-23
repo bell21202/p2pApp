@@ -29,3 +29,18 @@ export default(type) => {
         return val;
     }  
 };
+
+export const formatConverter = (type, mem) => {
+    if(type.tutor)
+    {
+        mem.push("Tutor");
+    }
+    if(type.mentor)
+    {
+        mem.push("Mentor");
+    }
+    if(type.scholar)
+    {
+        mem.push("Scholar");
+    }
+};

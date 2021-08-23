@@ -1,24 +1,35 @@
-import React from 'react';
-import {TouchableOpacity, Image, StyleSheet, Text} from 'react-native';
+import React, {useState} from 'react';
+import {TouchableOpacity, Image, StyleSheet, Text, View} from 'react-native';
 import {withNavigation} from 'react-navigation';
+import {Overlay} from 'react-native-elements';
+import SettingsScreen from '../screens/SettingsScreen';
 
 const Category = ({children, routeName, navigation }) => {
-    var hubTitle = routeName;
-    
-    if (routeName != null && routeName.includes('Hub')) {
-        // reset to real routename
-        routeName = 'Hub';
+    const [showOverlay, setShowOverlay] = useState(false);
+
+    if(routeName == 'Scholars Hub') {
+        routeName = 'ScholarHub';
+    } else if(routeName == 'Community Hub') {
+        routeName = 'CommHub';
     }
     return (
-        <TouchableOpacity style={styles.container} onPress ={() => navigation.navigate(routeName, {hubTitle})}>
-            {children}
-        </TouchableOpacity>
-    )
+        <>
+            <TouchableOpacity style={styles.container} onPress ={() => {routeName == 'Settings' ? setShowOverlay(!showOverlay) : navigation.navigate(routeName)}}>
+                {children}
+            </TouchableOpacity>
+
+            {showOverlay ?
+                <Overlay overlayStyle={styles.overlay} isVisible={showOverlay} onBackdropPress={() => setShowOverlay(!showOverlay)}>
+                    <SettingsScreen overlayFunction={setShowOverlay}/>
+                </Overlay> : null
+            }
+        </>
+    );
 };
 
 const styles = StyleSheet.create({
     container: {
-        paddingTop: 10,
+        paddingTop: 15,
         borderBottomColor: '#606060',
         borderColor: '#ebebeb',
         borderWidth: .75,
@@ -27,7 +38,14 @@ const styles = StyleSheet.create({
         width:95,
         backgroundColor: 'white',
         borderRadius: 10,
-        marginBottom: 15
+        marginBottom: 10
+    },
+    overlay: {
+        borderRadius: 5,
+        padding: 0,
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
+        paddingBottom: 10
     }
 });
 

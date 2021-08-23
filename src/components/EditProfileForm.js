@@ -1,19 +1,21 @@
 import React, {useContext, useState} from 'react';
-import {Text, View, StyleSheet, TouchableOpacity} from 'react-native';
+import {Text, View, StyleSheet, TouchableOpacity, ToastAndroid, Platform, Alert} from 'react-native';
 import Spacer from '../components/Spacer';
 import {Context as AuthContext} from '../context/AuthContext';
-import {NavigationEvents, SafeAreaView} from 'react-navigation';
+import {NavigationEvents} from 'react-navigation';
 import CustomInput from '../components/CustomInput';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import memTypeConverter from '../helpers/memTypeConverter';
 import { Checkbox } from 'react-native-paper';
 import InitStyle from '../stylecomponents/InitStyle';
+import {navigate} from '../navigationRef';
+import {Avatar} from 'react-native-elements';
+import UserAvatar from '../components/UserAvatar';
 
-
-const EditProfileForm = (newUser) => {
+const EditProfileForm = ({nav}) => {
     const {state, accountSave, clearErrorMessage} = useContext(AuthContext);
-    const {email, firstname, lastname, memberType, cohortDate, errorMessage} = state;
+    const {email, password, firstname, lastname, memberType, cohortDate, errorMessage, userId} = state;
 
     // use the defaults we have
     const [emailIn, setEmail] = useState(email);
@@ -22,6 +24,9 @@ const EditProfileForm = (newUser) => {
     const [memberTypeIn, setMemType] = useState(memberType);
     const [cohortDateIn, setCohortDate] = useState(cohortDate);
     const [visible, setVisible] = useState(false);
+    const [internalErr, setInternalErr] = useState(null);
+
+    var showTitle = false;
 
     // event handler from date picker
     const datePicked = (event, selectedDate) => {
@@ -34,6 +39,14 @@ const EditProfileForm = (newUser) => {
         }
     };
 
+    const saveConfirmation = (msg) => {
+        if(Platform.OS == 'android') {
+            ToastAndroid.show(msg, ToastAndroid.SHORT)
+        } else{
+            Alert.alert(msg); // todo_pp: what does this really show on ios??
+        }
+    }
+
     // event handler from check boxes
     const checkboxHandler = () => {
         var val = memTypeConverter({t : type.tutor, m : type.mentor, s: type.scholar});
@@ -42,8 +55,52 @@ const EditProfileForm = (newUser) => {
     }
     var type = memTypeConverter(memberTypeIn);
 
+    const validate = () => {
+        if(firstnameIn === null || firstnameIn === undefined || firstnameIn.match(/^ *$/) !== null){
+            setInternalErr('Firstname cannot be blank.')
+        }
+        else if(lastnameIn === null || lastnameIn === undefined || lastnameIn.match(/^ *$/) !== null){
+            setInternalErr('Lastname cannot be blank.')
+        }
+        else if(emailIn === null || emailIn === undefined || emailIn.match(/^ *$/) !== null){
+            setInternalErr('Email cannot be blank.')
+        }
+        // todo_pp: confirm if this should really be required
+        /*
+        else if(memberTypeIn === null || memberTypeIn === undefined || memberTypeIn == ''){
+            setInternalErr('Must select a member type.');
+        }*/
+        else{
+            setInternalErr(null);
+            // just pass the password and userId through!
+            accountSave({emailIn, password, firstnameIn, lastnameIn, memberTypeIn, cohortDateIn, userId})
+
+            // show confirmation, only aftr initial login
+            if(nav.state.routeName == 'EditProfile')
+            {
+                saveConfirmation('Saved');
+            }
+        }
+    };
+
+    // switch up the avatar image
+    if(firstnameIn != undefined && firstnameIn != null && firstnameIn != '')
+    {
+        showTitle = true;
+    }
+
     return (
     <View>
+        <View style={styles.headerView}>
+            <Spacer>
+            {showTitle ?
+                <UserAvatar size={'large'} title={firstnameIn.charAt(0)} color={'#f7f6f6'} />
+                :
+                <Avatar rounded icon={{name: 'camera', type: 'font-awesome'}} overlayContainerStyle={{backgroundColor: 'lightgray'}} size={'large'} />
+            }
+            </Spacer>
+        </View>
+
         <NavigationEvents onWillFocus={clearErrorMessage} />
         <View style={InitStyle.textView}>
         <Spacer>
@@ -76,9 +133,16 @@ const EditProfileForm = (newUser) => {
                 style={styles.inputStyle}
                 theme={{ colors: { text: 'black', primary: '#2196f3' }}}
             />
-         </Spacer>
-         <Spacer>
-            <TouchableOpacity style={styles.passwordButton}> 
+        </Spacer>
+        {internalErr ?
+        <View>
+            <Spacer>
+                <Text style={InitStyle.errorMessage}>{internalErr}</Text>
+            </Spacer>
+        </View> : null
+        }
+        <Spacer>
+            <TouchableOpacity style={styles.passwordButton} onPress={() => navigate('ChangePassword', {nav})}>
                 <Text style={{fontSize: 14, color: '#2196f3', fontWeight: 'bold'}}> Change password </Text>
             </TouchableOpacity>
         </Spacer>
@@ -100,7 +164,7 @@ const EditProfileForm = (newUser) => {
                     mode={'outlined'}
                     label={"Graduation Year"}
                     value={cohortDateIn ? moment(cohortDateIn).calendar() : 'mm/dd/yyyy'}
-                    style={{height: 35, width: 175}} // todo: is this a problem??
+                    style={{height: 35, width: '55%'}}
                     theme={{ colors: { text: 'black', primary: '#2196f3' }}}
                     // set editable based on if they are a scholar
                     editable={type.scholar}
@@ -110,7 +174,7 @@ const EditProfileForm = (newUser) => {
             
             {visible ? <DateTimePicker
                 testID="dateTimePicker"
-                value={!cohortDateIn ? Date.now() : cohortDateIn}
+                value={!cohortDateIn ? Date.now() : moment(cohortDateIn).toDate()}
                 mode='date'
                 onChange={datePicked}
                 display='spinner'/> : null
@@ -124,7 +188,7 @@ const EditProfileForm = (newUser) => {
                 </Spacer>
                 <Spacer />
                 <Spacer>
-                    <TouchableOpacity style={InitStyle.button} onPress={() => accountSave({emailIn, firstnameIn, lastnameIn, memberTypeIn, cohortDateIn})}> 
+                    <TouchableOpacity style={InitStyle.button} onPress={() => validate()}>
                     <Text style={InitStyle.buttonText}> Save </Text>
                     </TouchableOpacity>
                 </Spacer>
@@ -140,6 +204,10 @@ const styles = StyleSheet.create({
         marginRight: 20,
         marginTop: 50,
     },
+    headerView: {
+        alignItems: 'center',
+        marginTop: '5%'
+    },
     errorMessage: {
         fontSize: 16, 
         color: 'red',
@@ -147,7 +215,7 @@ const styles = StyleSheet.create({
         marginTop: 15
     },
     inputStyle: {
-        height: 35
+        height: 40
     },
     checkboxContainer: {
         flexDirection: 'row',

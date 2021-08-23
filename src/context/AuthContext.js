@@ -7,43 +7,93 @@ const authReducer = (state, action) => {
     switch(action.type) {
         case 'add_error':
             return {...state, errorMessage: action.payload};
+        case 'signup':
+            return {...state, email: action.payload.email, password: action.payload.password};
         case 'signin':
             var user = action.payload.user;
-            var token = action.payload.token;
-            return {errorMessage: '', email: user.email, firstname: user.firstname, lastname: user.lastname, memberType: user.memberType, cohortDate: user.cohortDate, token: token};
+            // todo: research if better to pass in a user and not this long string of state variables
+            return {errorMessage: '', email: user.email, firstname: user.firstname, lastname: user.lastname, memberType: user.memberType, cohortDate: user.cohortDate, isAdmin: user.isAdmin, userId: user._id};
         case 'clear_error_message':
             return{...state, errorMessage: ''};
         case 'signout':
-            return {token: null, error: ''};
+            return {error: '', state: null};
         //case 'accountSave': // update picture maybe??
             //return {...state, errorMessage: ''};
         case 'accountSaveError':
             return {...state, errorMessage: action.payload};
         case 'submitPost':
+            if(action.payload.hubType == 's'){
+                return {...state, sPosts: action.payload.posts, adminPosts: action.payload.posts};
+            } else if(action.payload.hubType == 'stm') {
+                return {...state, cPosts: action.payload.posts, adminPosts: action.payload.posts};
+            }
         case 'getPosts':
-            console.log("in reducer" );
-            return {...state, posts: action.payload.posts}
+            if(action.payload.hubType == 's'){
+                return {...state, sPosts: action.payload.posts}
+            } else if(action.payload.hubType == 'stm') {
+                return {...state, cPosts: action.payload.posts}
+            }
+        case 'getAdminPosts':
+            return {...state, adminPosts: action.payload.posts}
         case 'getPostsError':
         case 'submitPostError':
+        case 'getUsersError':
             return {...state, errorMessage: action.payload}
+        case 'changePasswordError':
+            return {...state, errorMessage: action.payload}
+        case 'getUsers':
+            return {...state, users: action.payload.users}
+        case 'sendChat':
+            var newMessage = action.payload.newMessage;
+            return {...state, newMessagePub: newMessage}
         default:
             return state;
     }
 };
 
-// update token state here
+/**** Push Notifications ***********/
+const savePushToken = dispatch => async ({token}) => {
+    try{
+        await app_API.post('/savePushToken', {token});
+    } catch (err) {
+        // todo_log: statement
+    }
+};
+
+const getUserSettings = dispatch => async () => {
+    try{
+        const response = await app_API.post('/getUserNotificationSettings');
+        return response.data.userNotificationSettings; // return directly
+    } catch(err) {
+        // todo_log: statement
+        // dispatch getUserSettings error
+    }
+}
+
+const saveUserSettings = dispatch => async ({settings}) => {
+    try{
+        const response = await app_API.post('/saveUserSettings', {settings});
+    } catch(err) {
+        // todo_log: statement
+        // dispatch setUserSettings error
+    }
+}
+
+/**** Authentication Scheme **********/
 const tryLocalSignin = dispatch => async () => {
     try{
-        token = await AsyncStorage.getItem('token') // should this string be unique?
+        token = await AsyncStorage.getItem('token') // todo_pp: should this string be unique?
         if(token) {
-            // todo: make a request to server to get current user!!
-            dispatch({type: 'signin', payload: token});
+            const response = await app_API.post('/autoLogin');
+            dispatch({type: 'signin', payload: response.data});
+            navigate('mainFlow');
+            return;
         }
     }
     catch(err){
+        // todo_log: statement
     }
-    // token = token?
-    navigate('mainFlow');
+    navigate('initFlow');
 };
 
 const clearErrorMessage = dispatch => () => {
@@ -52,18 +102,13 @@ const clearErrorMessage = dispatch => () => {
 
 const signup = dispatch => async ({email, password}) => {
     try{
-        const response = await app_API.post('/signup', {email,password});
-        try{
-            await AsyncStorage.setItem('token', response.data.token); 
-        }
-        catch(err){console.log("error setting token")};
-        dispatch({type: 'signin', payload: response.data});
+        dispatch({type: 'signup', payload: {email, password}});
         navigate('CreateProfile');
     }
     catch(err)
     {
-        console.log(err)
-        dispatch({type: 'add_error', payload: 'Uh oh..something went wrong with signing up :('})
+        // todo_log: statement
+        dispatch({type: 'add_error', payload: 'Invalid password or email'})
     }
 };
 
@@ -73,41 +118,71 @@ const signin = dispatch => async ({email, password}) => {
         try{
             await AsyncStorage.setItem('token', response.data.token);
         }
-        catch(err){console.log("error setting token")}
+        catch(err){
+            // todo_log: statement
+        }
         dispatch({type: 'signin', payload: response.data});
         navigate('mainFlow');
     }
     catch(err) {
-        console.log(err)
-        dispatch({type: 'add_error', payload: 'Uh oh..something went wrong with signing in'});
+        // todo_log: statement
+        dispatch({type: 'add_error', payload: 'Invalid password or email'});
     }
 };
 
 const signout = (dispatch) => async () => {
     try {
         await AsyncStorage.removeItem('token');
+        navigate('initFlow');
+        dispatch({type: 'signout'}); // wipe out the state
     }
-    catch(err){}
-   
-    // todo: do we want to show an error payload?
-    dispatch({type: 'signout'});
-    navigate('initFlow');
+    catch(err){
+        // todo_log statement
+    }
 };
 
 const accountSave = (dispatch) => async (props) => {
     email = props.emailIn;
+    password = props.password;
     firstname = props.firstnameIn;
     lastname = props.lastnameIn;
     memberType = props.memberTypeIn;
     cohortDate = props.cohortDateIn;
+    userId = props.userId;
+
     try {
-        const response = await app_API.post('/saveAccount', {email, firstname, lastname, memberType, cohortDate});
+        const response = await app_API.post('/saveAccount', {email, password, firstname, lastname, memberType, cohortDate, userId});
+        var token = await AsyncStorage.getItem('token');
+
+        // check for token
+        if(!token) {
+            await AsyncStorage.setItem('token', response.data.token);
+        }
+
         dispatch({type: 'signin', payload: response.data});
         navigate('mainFlow');
     }
     catch(err) {
-        console.log(err);
-        dispatch({type: 'accountSaveError', payload: err});  // change this later??
+        // todo_log: This occasionally fails for some reason.
+        //dispatch({type: 'accountSaveError', payload: err});  // change this later??
+    }
+}
+
+const changePassword = (dispatch) => async (props) => {
+    oldPass = props.oldPass;
+    newPass = props.newPass;
+    var navigation = props.navigation;
+
+    try{
+        await app_API.post('/changePassword', {oldPass, newPass});
+        dispatch({type: 'clear_error_message'});
+        if(navigation)
+        {
+            navigation.pop(); // navigate back to parent caller
+        }
+    }
+    catch(err) {
+        dispatch({type:'changePasswordError', payload: 'Password entered does not match your previous password.'});
     }
 }
 
@@ -117,13 +192,15 @@ const submitPost = (dispatch) => async  (props) => {
     firstname = props.firstname;
     lastname = props.lastname;
     parentId = props.parentId;
+    isAdmin = props.isAdmin;
 
     try {
-        const response = await app_API.post('/submitPost', {postText, hubType, firstname, lastname, parentId});
+        const response = await app_API.post('/submitPost', {postText, hubType, firstname, lastname, parentId, isAdmin});
+        response.data.hubType = props.hubType;
         dispatch({type: 'submitPost', payload: response.data});
     }
     catch(err) {
-        console.log(err);
+        // todo_log: statement
         dispatch({type: 'submitPostError', payload: err});
     }
 }
@@ -131,16 +208,89 @@ const submitPost = (dispatch) => async  (props) => {
 const getPosts = (dispatch) => async (props) => {
     try{  
         const response = await app_API.post('/getPosts', {"hubType" : props.hubType});
+        response.data.hubType = props.hubType;
         dispatch({type: 'getPosts', payload: response.data})
     }
     catch(err) {
-        console.log(err);
+        // todo_log: statement
         dispatch({type: 'getPostsError', payload: err});
     }  
 }
 
+const getAdminPosts = (dispatch) => async () => {
+    try{
+        const response = await app_API.post('/getAdminPosts');
+        dispatch({type: 'getAdminPosts', payload: response.data})
+    }
+    catch(err) {
+        // todo_log: statement
+        dispatch({type: 'getPostsError', payload: err});
+    }
+}
+
+const getUsers = (dispatch) => async () => {
+    try {
+        const response = await app_API.post('/getUsers');
+        dispatch({type: 'getUsers', payload: response.data})
+    }
+    catch(err) {
+        // todo_log: statement
+        dispatch({type: 'getUsersError', payload: err});
+    }
+}
+/**** Chat Messaging Scheme **********/
+const getUserChats = (dispatch) => async (props) => {
+    try {
+        const response = await app_API.post('/getUserChats');
+        return response.data.chats;  // return directly
+    }
+    catch(err) {
+        // todo_log: statement
+        // dispatch({type: 'getChatsError', payload: err})
+    }
+}
+
+const sendChat = (dispatch) => async (props) => {
+    messageText = props.text;
+    messageTo = props.to;
+
+    try{
+        const response = await app_API.post('/sendChat', {messageText, messageTo});
+
+        // notify all "listeners" of the new message
+        dispatch({type: 'sendChat', payload: response.data});
+    }
+    catch(err) {
+        // todo_log: statement
+        // dispatch({type: 'sendChatError', payload: err})
+    }
+}
+
+const getChatHistory = (dispatch) => async (props) => {
+    other = props.other;
+    try{
+        const response = await app_API.post('/getChatHistory', {other});
+        return response.data.chatHistory;  // return directly
+    }
+    catch(err) {
+        // todo_log: statement
+        // dispatch({type: 'getChatHistoryError', payload: err});
+    }
+}
+
+const setRead = (dispatch) => async (props) => {
+    messages = props.messages;
+    try{
+        await app_API.post('/setRead', {messages});
+    }
+    catch(err) {
+        // todo_log: statement
+        // dispatch({type: 'setReadError', payload: err});
+    }
+}
+
 export const {Provider, Context} = createDataContext(authReducer,
-    {signin, signout, signup, clearErrorMessage, tryLocalSignin, accountSave, submitPost, getPosts},
-     {token: null, errorMessage: '', email: '', password: '', firstname: '', lastname: '', memberType: '', cohortDate: null, posts: []});
+    {signin, signout, signup, clearErrorMessage, savePushToken, tryLocalSignin, accountSave, submitPost, getPosts, getAdminPosts, changePassword, getUsers, getUserChats, sendChat, getChatHistory, setRead, getUserSettings, saveUserSettings},
+     {errorMessage: '', email: '', password: '', firstname: '', lastname: '', memberType: '', isAdmin: false, cohortDate: null, sPosts: [], cPosts: [], adminPosts: [], users: [], userId: '', newMessagePub: null});
 
 

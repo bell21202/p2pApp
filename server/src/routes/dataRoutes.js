@@ -4,25 +4,39 @@ const jwt = require('jsonwebtoken');
 const requireAuth = require('../middlewares/requireAuth');
 const User = mongoose.model('User');
 const Post = mongoose.model('Post');
+const Message = mongoose.model('Message');
+const Notification = mongoose.model('Notification');
+const pushService = require('../notifications/pushService');
 
 const router = express.Router();
 
-router.post('/saveAccount', requireAuth, async (req, res) => {
-    const {email, firstname, lastname, memberType, cohortDate} = req.body;
-    var user = req.user;
-    userId = user._id;
+//todo_pp: be sure to use .get instead of post for some of these, and in authcontext
+
+router.post('/saveAccount', async (req, res) => {
+    const {email, password, firstname, lastname, memberType, cohortDate, userId} = req.body;
     try
     {
-         // update our user info
-        await User.findOneAndUpdate({_id: userId}, {email, firstname, lastname, memberType, cohortDate}, {returnOriginal: false}, (err,doc) => {
-            if (err) {
-                throw err;
-            }
-            // get the updated user back
-            user = doc;
-        });
-
-        res.send({"user" : user}); // send the user back
+        var user;
+        // User is editing account
+        if(userId != null && userId != '')
+        {
+            // update our user info
+            await User.findOneAndUpdate({_id: userId}, {email, firstname, lastname, memberType, cohortDate}, {returnOriginal: false}, (err,doc) => {
+                if (err) {
+                    throw err;
+                }
+                // get the updated user back
+                user = doc;
+            });
+        }
+        // This is their first account save
+        else {
+            user = new User({email, password, firstname, lastname, memberType, cohortDate});
+            await user.save();
+        }
+        const token = jwt.sign({userId: user._id},'MY_SECRET_KEY'); // place somewhere in s3 bucket or something
+        
+        res.send({"token" : token, "user" : user});
     }
     catch (err) {
         return res.status(422).send(err.message); 
@@ -30,7 +44,7 @@ router.post('/saveAccount', requireAuth, async (req, res) => {
 });
 
 router.post('/submitPost', requireAuth, async (req, res) => {
-    const {postText, hubType, firstname, lastname, parentId} = req.body;
+    const {postText, hubType, firstname, lastname, parentId, isAdmin} = req.body;
 
     // convert our hubtype
     var type = convertHubType(hubType);
@@ -39,7 +53,7 @@ router.post('/submitPost', requireAuth, async (req, res) => {
     userId = user._id;
 
     try{
-        const post = new Post({'createdBy':userId,'createdAt': Date.now(), 'hubType': type, 'message': postText, firstname, lastname, parentId});
+        const post = new Post({'createdBy':userId,'createdAt': Date.now(), 'hubType': type, 'message': postText, firstname, lastname, parentId, isAdmin});
         await post.save();
 
         // get all posts and send back, might put in separate method
@@ -48,9 +62,12 @@ router.post('/submitPost', requireAuth, async (req, res) => {
             return res.status(422).send({error: 'Posts retrieval error'});
         }  
         res.send({"posts" : posts});
+
+        sendPushNotifications(post);
     }
     catch (err) {
-        console.log("error during post submittal");
+        // todo_log: add statement
+        // console.log("error during post submittal");
         return res.status(422).send(err.message);
     }
 });
@@ -59,38 +76,415 @@ router.post('/getPosts', requireAuth, async (req, res) => {
     const {hubType} = req.body;
     var type;
     var posts;
-
+    
     try
     {
-        if(hubType != ''){
-            type = convertHubType(hubType);
-            posts = await Post.find({'hubType' : type}).sort({createdAt: -1}); // this should be better, consolidate functions
-        } else {
-            posts = await Post.find({}).sort({createdAt: -1});
-        }
-    
+        type = convertHubType(hubType);
+        posts = await Post.find({'hubType' : type}).sort({createdAt: -1}); // this should be better, consolidate functions
+        
         if(!posts) {
             return res.status(422).send({error: 'Posts retrieval error'});
         }
         res.send({'posts': posts});
     }
     catch (err) {
-        console.log('error during post retreival');
+        // todo_log: add statement
+        // console.log('error during post retreival');
         return res.status(422).send(err.message);
     }
 });
 
+router.post('/getAdminPosts', requireAuth, async (req, res) => {
+    try
+    {
+        posts = await Post.find({'isAdmin' : true}).sort({createdAt: -1}); // this should be better, consolidate functions
+        if(!posts) {
+            return res.status(422).send({error: 'Posts retrieval error'});
+        }
+        res.send({'posts': posts});
+    }
+    catch (err) {
+        // todo_log: add statement
+        // console.log('error during post retreival');
+        return res.status(422).send(err.message);
+    }
+})
+
+router.post('/changePassword', requireAuth, async (req, res) => {
+    const {oldPass, newPass} = req.body;
+    const user = req.user;
+    userId = user._id;
+
+    try{
+        await user.comparePassword(oldPass);
+
+        // now we can update the users password
+        await User.findOneAndUpdate({_id: userId}, {password: newPass}, (err,doc) => {
+            if (err) {
+                throw err;
+            }
+        });
+        res.status(200).send('completed');
+    }
+    catch(err) {
+        // the entered password doesn't match
+        return res.status(401).send(err.message);
+    }
+})
+
+router.post('/getUsers', requireAuth, async (req, res) => {
+    try {
+        users = await User.find().sort({firstname: 1});
+        if(!users) {
+            return res.status(422).send({error: 'Users retrieval error'});
+        }
+        res.send({'users': users});
+    }
+    catch (err) {
+        // todo_log: add statement
+        // console.log('error during users retreival');
+        return res.status(422).send(err.message);
+    }
+})
+
+router.post('/sendChat', requireAuth, async (req, res) => {
+    const {messageText, messageTo} = req.body;
+    var user = req.user;
+    userId = user._id;
+
+    try{
+        const message = new Message({'text': messageText, 'from': userId, 'to' : messageTo, 'createdAt': Date.now()});
+        await message.save();
+
+        //res.status(200).send('completed');
+        res.send({"newMessage" : message});
+
+        // only send a notification 'if' its directed to you
+        if(userId == messageTo){
+          sendPushNotifications(message);
+        }
+    }
+    catch (err) {
+        // todo_log: add statement
+        // console.log("error during sending chat");
+        return res.status(422).send(err.message);
+    }
+
+
+})
+
+router.post('/getUserChats', requireAuth, async (req, res) => {
+    var user = req.user;
+    userId = user._id;
+
+    try{
+        const msgToPipeline = [
+          {
+            '$match': {
+              'to': userId.toString()
+            }
+          }, {
+            '$group': {
+              '_id': '$from', 
+              'latestMsg': {
+                '$max': '$createdAt'
+              }, 
+              'doc': {
+                '$push': '$$ROOT'
+              }
+            }
+          }, {
+            '$project': {
+              'doc': {
+                '$filter': {
+                  'input': '$doc', 
+                  'as': 'item', 
+                  'cond': {
+                    '$eq': [
+                      '$$item.createdAt', '$latestMsg'
+                    ]
+                  }
+                }
+              }, 
+              '_id': 0
+            }
+          }, {
+            '$unwind': {
+              'path': '$doc'
+            }
+          }, {
+            '$addFields': {
+              'from_Id': {
+                '$toObjectId': '$doc.from'
+              }
+            }
+          }, {
+            '$lookup': {
+              'from': 'users', 
+              'localField': 'from_Id', 
+              'foreignField': '_id', 
+              'as': 'toArray'
+            }
+          }, {
+            '$unwind': {
+              'path': '$toArray'
+            }
+          }, {
+            '$addFields': {
+              'doc.chatParticipant': '$toArray'
+            }
+          }, {
+            '$project': {
+              'from_Id': 0, 
+              'toArray': 0
+            }
+          }
+        ];
+
+        const msgFromPipeline = [
+          {
+            '$match': {
+              'from': userId.toString()
+            }
+          }, {
+            '$group': {
+              '_id': '$to', 
+              'latestMsg': {
+                '$max': '$createdAt'
+              }, 
+              'doc': {
+                '$push': '$$ROOT'
+              }
+            }
+          }, {
+            '$project': {
+              'doc': {
+                '$filter': {
+                  'input': '$doc', 
+                  'as': 'item', 
+                  'cond': {
+                    '$eq': [
+                      '$$item.createdAt', '$latestMsg'
+                    ]
+                  }
+                }
+              }, 
+              '_id': 0
+            }
+          }, {
+            '$unwind': {
+              'path': '$doc'
+            }
+          }, {
+            '$addFields': {
+              'to_Id': {
+                '$toObjectId': '$doc.to'
+              }
+            }
+          }, {
+            '$lookup': {
+              'from': 'users', 
+              'localField': 'to_Id', 
+              'foreignField': '_id', 
+              'as': 'toArray'
+            }
+          }, {
+            '$unwind': {
+              'path': '$toArray'
+            }
+          }, {
+            '$addFields': {
+              'doc.chatParticipant': '$toArray'
+            }
+          }, {
+            '$project': {
+              'to_Id': 0, 
+              'toArray': 0
+            }
+          }
+        ];
+
+        const chatToCursor = Message.aggregate(msgToPipeline);
+        const chatFromCursor = Message.aggregate(msgFromPipeline);
+        var allChats = [];
+
+        (await chatToCursor).forEach(data => {
+            allChats.push(data.doc);
+        });
+
+        (await chatFromCursor).forEach(data => {
+            allChats.push(data.doc);
+        })
+
+        allChats.sort((x,y) => {
+            dateOfMsg1 = x.createdAt;
+            dateOfMsg2 = y.createdAt;
+            return dateOfMsg2 - dateOfMsg1;
+        });
+        res.send({'chats': allChats});
+    }
+    catch(err) {
+        // todo_log: add statement
+        // console.log('error during chats retreival');
+        return res.status(422).send(err.message);
+    }
+})
+
+router.post('/getChatHistory', requireAuth, async (req, res) => {
+    const {other} = req.body;
+
+    var user = req.user;
+    userId = user._id
+
+    try{
+        const chatHistory = await Message.find({
+            $or : [{
+                to: other,
+                from: userId
+            }, {
+                to: userId,
+                from: other
+            }]
+        }).sort({createdAt: 1});
+
+        if(!chatHistory) {
+            return res.status(422).send({error: 'chat history retrieval error'});
+        }
+        res.send({'chatHistory': chatHistory});
+    }
+    catch(err) {
+        // todo_log: add statement
+        // console.log('error during getting chat history');
+        return res.status(422).send(err.message);
+    }
+})
+
+router.post('/setRead', requireAuth, async (req, res) => {
+  const {messages} = req.body;
+  var msgIds = [];
+
+  messages.forEach(element => {
+    msgIds.push(element._id);
+  });
+
+  var filter = {
+    _id: {$in: msgIds}
+  };
+
+  const result = await Message.updateMany(filter, {isRead: true});
+})
+
+router.post('/savePushToken', requireAuth, async (req, res) => {
+  const {token} = req.body;
+
+  var user = req.user;
+  var userId = user._id;
+
+  key = {'userId' : userId};
+  value = {'pushNotificationToken': token, 'settings' : {'mainNotify' : true}};
+  try{
+    await Notification.updateOne(key, value, {upsert:true});
+    res.status(200).send('completed');
+  }
+  catch(err) {
+    return res.status(422).send(err.message);
+  }
+})
+
+// todo_pp: later change to just c or something
 const convertHubType = (hubType) => {
-    if (hubType == 's' || hubType == 'stm') {
-        return hubType;
-    }
-    else if(hubType == 'Scholars Hub'){
-        hubType = 's';
-    } else{
-        hubType = 'stm';
-    }
-    return hubType;
+  if (hubType == 's' || hubType == 'stm') {
+      return hubType;
+  }
+  else if(hubType == 'Scholars Hub'){
+      hubType = 's';
+  } else{
+      hubType = 'stm';
+  }
+  return hubType;
 };
 
+const sendPushNotifications = async (obj) => {
+  try{
+    var notificationObjs;
+    var title = 'Prison-to-Professional Network';
+    var body;
+    var data;
+    var messages = [];
+
+    // push notification for submitting post
+    if (obj instanceof Post) {
+      data = obj;
+      if(obj.isAdmin){
+        body = 'P2P sent out a new notification!'
+        notificationObjs = await Notification.find({'settings.mainNotify': true});
+      }
+      // scholar
+      else if(obj.hubType == 's') {
+        body = obj.firstname + ' ' + obj.lastname + ' posted in Scholars Hub';
+        notificationObjs = await Notification.find({'settings.scholarNotify': true});
+      }
+      // community
+      else {
+        body = obj.firstname + ' ' + obj.lastname + ' posted in Community Hub';
+        notificationObjs = await Notification.find({'settings.communityNotify': true});
+      }
+    }
+    // push notification for direct messaging
+    else if (obj instanceof Message) {
+      notificationObjs = await Notification.find({'settings.chatNotify': true});
+      messenger = await User.findById(obj.from);
+      data = messenger;
+      body = messenger.firstname + ' ' + messenger.lastname + ' sent you a new message!';
+    }
+
+    // create a message object for every record
+    notificationObjs.forEach(element => {
+      var token = element.pushNotificationToken;
+      messages.push({
+        to: token,
+        body: body,
+        data: data,
+        title: title,
+      })
+    });
+
+    pushService(messages);
+  }
+  catch(err) {
+    // todo_log add statement
+  }
+}
+
+router.post('/getUserNotificationSettings', requireAuth, async (req, res) => {
+  const user = req.user;
+  userId = user._id;
+  try{
+    const userNotification = await Notification.find({'userId' : userId});
+    res.send({"userNotificationSettings" : userNotification});
+  } catch(err) {
+    // todo_log: add statement
+    return res.status(422).send(err.message);
+  }
+});
+
+router.post('/saveUserSettings', requireAuth, async (req, res) => {
+  const user = req.user;
+  var userId = user._id;
+  const {settings} = req.body;
+  try{
+    // the user does NOT want to receive notifications
+    if(settings.mainNotify == false){
+      // delete the notification from the db
+      await Notification.findOneAndDelete({userId: userId});
+    } else {
+      await Notification.findOneAndUpdate({userId: userId}, {settings: settings}, {upsert:true});
+    }
+    res.status(200).send('completed');
+  } catch(err) {
+    // todo_log: add statement
+    return res.status(422).send(err.message);
+  }
+});
 
 module.exports = router;

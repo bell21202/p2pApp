@@ -49,4 +49,8 @@ export default StyleSheet.create({
         fontSize: 18,
         color: '#2196f3'
     },
+    errorMessage: {
+        fontSize: 14,
+        color:'#e16122',
+    },
 });

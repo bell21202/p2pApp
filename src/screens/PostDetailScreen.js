@@ -1,37 +1,55 @@
 import React, {useContext, useState} from 'react';
-import {StyleSheet, View, Text, TouchableOpacity, Image, FlatList} from 'react-native';
+import {StyleSheet, View, TouchableOpacity, FlatList} from 'react-native';
 import {Context as AuthContext} from '../context/AuthContext';
 import PostInput from '../components/PostInput';
 import Post from '../components/Post';
 import {getPostRepliesById} from '../helpers/getPostsRelationship';
+import {Icon} from 'react-native-elements';
 
 var parentPost;
 
 const PostDetailScreen = ({navigation}) => {
     const {submitPost, getPosts, state} = useContext(AuthContext);
-    const {posts} = state;
+    const {cPosts, sPosts, firstname, lastname} = state;
 
-    var navState = navigation.state;
-    parentPost = navState.params.post;
+    parentPost = navigation.state.params.post;
 
-    // this is a bug, this data (firstname, lastnmae) should really be coming from the current user for submitting post
-    var firstname = parentPost.firstname;
-    var lastname = parentPost.lastname
     var firstLetterInName = firstname.charAt(0);
-    
     var hubType = parentPost.hubType;
     var parentId = parentPost._id;
 
     var inputRef = null;
     var isLoading = false;
+    var replyCount;
+    var replies;
 
-    var replies = getPostRepliesById(parentPost._id, posts);
+    const fetchPostOfInterest = async () => {
+        try {
+            await getPosts({hubType})
+        }
+        catch(err){
+            // todo_log statement
+        }
+    };
 
-    // preserve the reply count before adding the parent post
-    var replyCount = replies.length;
-    replies.unshift(parentPost);
-
-    console.log('rendering in detail screen');
+    if(hubType == 's') {
+        if(sPosts == null) {
+            fetchPostOfInterest();
+        } else{
+            replies = getPostRepliesById(parentPost._id, sPosts);
+            replyCount = replies.length;
+            replies.unshift(parentPost);
+        }
+    }
+    else if(hubType == 'stm') {
+        if(cPosts == null){
+            fetchPostOfInterest();
+        } else {
+            replies = getPostRepliesById(parentPost._id, cPosts);
+            replyCount = replies.length;
+            replies.unshift(parentPost);
+        }
+    }
 
     const constructPostReply = (post) => {
         return (
@@ -50,22 +68,19 @@ const PostDetailScreen = ({navigation}) => {
     }
 
     const refreshReplies = async () => {
-        console.log('refreshing replies');
         isLoading = true;
         try{
-            // this is when someone else makes a comment while the user
-            // is on this screen
             await getPosts({hubType});
         }
         catch(err) {
-            console.log("error in fetch posts"); // change later
+            // todo_log statement
         }
         isLoading = false;
     };
 
     return(
         <View style={styles.container}>
-            <View style={styles.repliesContainer}> 
+            <View style={styles.repliesContainer}>
                 <FlatList
                     data={replies}
                     renderItem={(item) => constructPostReply(item)}
@@ -78,7 +93,7 @@ const PostDetailScreen = ({navigation}) => {
             <View style={styles.postInputView}>
                 <PostInput ref={input => inputRef = input} title={firstLetterInName} placeholder={'Add a comment...'} />
                 <TouchableOpacity onPress={() => [submitPost({"value" : inputRef.props.value, hubType, firstname, lastname, 'parentId' : parentId}), resetInput()]}>
-                    <Image style={styles.iconStyle} source={require('../img/planeFill_icon.png')} />
+                    <Icon name="paper-plane" type='font-awesome' color={'#2196f3'} containerStyle={{marginLeft: 5}} />
                 </TouchableOpacity>
             </View>  
         </View>
@@ -109,9 +124,9 @@ const styles = StyleSheet.create({
         bottom: 0,
         right: 0,
         flexDirection: 'row',
-        backgroundColor: 'black',
-        opacity: .75,
-        width: '100%'
+        backgroundColor: 'lightgray',
+        width: '100%',
+        alignItems: 'center',
     },
     iconStyle: {
         marginTop: 20, 

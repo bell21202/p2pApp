@@ -15,7 +15,6 @@ const Notification = ({post}) => {
         }
     }
 
-    // todo: a similar function is on the server..place both functions on the client
     var hubType = convertHubType(post.hubType);
 
     return (

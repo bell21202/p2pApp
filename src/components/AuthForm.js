@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {StyleSheet, View, TouchableOpacity} from 'react-native';
+import {StyleSheet, View, TouchableOpacity, Linking} from 'react-native';
 import {Text} from 'react-native-elements';
 import Spacer from './Spacer';
 import {Checkbox} from 'react-native-paper';
@@ -12,6 +12,33 @@ const AuthForm = ({headerText, errorMessage, onSubmit, submitButtonText}) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [checked, setChecked] = useState(false);
+    const [internalErr, setInternalErr] = useState(null);
+
+    const validate = () => {
+        if(headerText === 'Sign up') {
+            if(!checked) {
+                setInternalErr('You must agree to the consent and confidentiality policy.');
+            }
+            else if(email === null || email === undefined || email.match(/^ *$/) !== null){
+                setInternalErr('Email cannot be blank.')
+            }
+            else if(password === null || password === undefined || password.match(/^ *$/) !== null){
+                setInternalErr('Password cannot be blank.')
+            }
+            else{
+                setInternalErr(null);
+                onSubmit({email,password})
+            }
+        }
+        else {
+            onSubmit({email,password})
+        }
+    }
+
+    // todo_pp: later place link somewhere else.
+    const openLink =() => {
+        Linking.openURL('https://docs.google.com/forms/d/e/1FAIpQLSeLMH0XKjFhA2KANTw-o_W2MHeC1_WVXVtMLYTVB5LSJLfkdQ/viewform?usp=sf_link').catch((err) => {/* todo_log: add statement */});
+    }
 
     return (
         <SafeAreaView forceInset={{top: 'always'}}>
@@ -44,14 +71,17 @@ const AuthForm = ({headerText, errorMessage, onSubmit, submitButtonText}) => {
                 {(headerText === 'Sign up') ?
                 <View style={styles.viewStyle}> 
                     <Checkbox color={'#2196f3'} status={checked ? 'checked' : 'unchecked'} onPress={() => {setChecked(!checked)}} />
-                    <Text style ={styles.checkboxLabel}>
-                            I agree to the consent and confidentiality privacy policy. 
-                    </Text>
+                    <TouchableOpacity onPress={openLink}>
+                        <Text style ={styles.checkboxLabel}>
+                                I have agreed to the <Text style={{color: '#2196f3'}}>consent and confidentiality</Text> privacy policy.
+                        </Text>
+                    </TouchableOpacity>
                 </View> : null
                 }
-                {errorMessage ? <Text style={styles.errorMessage}>{errorMessage}</Text> : null}
+                {errorMessage ? <Text style={[InitStyle.errorMessage, {marginLeft: 10, marginRight: 10}]}>{errorMessage}</Text> : null}
+                {internalErr ? <Text style={[InitStyle.errorMessage, {marginLeft: 10, marginRight: 10}]}>{internalErr}</Text> : null}
                 <Spacer>
-                <TouchableOpacity style={InitStyle.button} onPress={() => onSubmit({email,password})}>
+                <TouchableOpacity style={InitStyle.button} onPress={() => validate()}>
                     <Text style={InitStyle.buttonText}>
                         {submitButtonText}
                     </Text>
@@ -64,12 +94,6 @@ const AuthForm = ({headerText, errorMessage, onSubmit, submitButtonText}) => {
 };
 
 const styles = StyleSheet.create({
-    errorMessage: {
-        fontSize: 14, 
-        color: '#e61610',
-        marginLeft: 10,
-        marginRight: 10
-    },
     inputStyle: {
         height: 45
     },
